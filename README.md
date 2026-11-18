@@ -6,6 +6,8 @@ Saatler `Europe/Istanbul` saat dilimindedir. Aynı personele aynı aralık iki k
 
 Bu sürümde müşteriye SMS, WhatsApp veya e-posta gitmez. Gönderim için kuyruk tabloları hazırdır, worker yoktur.
 
+Yayına almak için adım adım anlatım: [docs/YAYINA-ALMA.md](docs/YAYINA-ALMA.md). Mağaza metinleri `docs/store` altındadır.
+
 ## Neler var
 
 - `apps/web` — Next.js paneli ve herkese açık randevu sayfası (`/s/<salon-slug>`).
@@ -39,9 +41,8 @@ pnpm install
 ## 3. Migrasyonu çalıştırın
 
 1. Supabase panosunda **SQL Editor**’ü açın.
-2. `supabase/migrations/20261118120000_init.sql` dosyasının tamamını yapıştırıp çalıştırın.
-3. Ardından `supabase/migrations/20261118140000_salon_branding.sql` dosyasını da aynı şekilde çalıştırın. Bu dosya salon profili alanlarını ve `salon-media` görsel kovasını ekler. Logo ve kapak herkese açıktır; yükleme, değiştirme ve silme yalnızca salon sahibine aittir. Dosyalar en fazla 2 MB, JPG, PNG veya WebP olabilir. Uygulama yüklemeden önce logoyu 512, kapağı 1600 piksele küçültür.
-4. Son olarak `supabase/migrations/20261118160000_launch_rules.sql` dosyasını çalıştırın. Spam sınırları, müşteri iptal bağlantısı, KVKK onay kaydı, manuel randevu, saat kapatma ve personel hesapları bu dosyadadır.
+2. `supabase/setup.sql` dosyasının tamamını yapıştırıp bir kez çalıştırın. Bu dosya üç migrasyonu sırayla uygular: ilk kurulum, salon profili ve görseller, yayın kuralları (spam sınırı, müşteri iptali, KVKK onayı, manuel randevu, saat kapatma, personel hesapları).
+3. Aynı işi komut satırından yapmak isterseniz `supabase link` ardından `supabase db push`. `main` dalına her gönderimde GitHub Action da `db push` çalıştırır; sırlar yoksa adımı atlar. Adım adım anlatım `docs/YAYINA-ALMA.md` içindedir.
 
 Bu dosya şunları kurar:
 
@@ -58,11 +59,11 @@ Bu dosya şunları kurar:
 - İkinci migrasyon: ilçe, harita, Instagram, çalışma saati özeti, logo ve kapak; `salon-media` kovası
 - Üçüncü migrasyon `20261118160000_launch_rules.sql`: telefon ve IP sınırı, müşteri iptal bağlantısı, KVKK onayı, manuel randevu ve saat kapatma, personel daveti ve rol bazlı RLS
 
-CLI kullanıyorsanız proje kökünde `supabase link` ve `supabase db push` de aynı dosyayı uygular. Yerel Docker şart değildir.
+CLI kullanıyorsanız proje kökünde `supabase link` ve `supabase db push` aynı şemayı `supabase/migrations` dosyalarından kurar. `setup.sql` ile kurulumu yaptıysanız `db push` bu üç dosyayı atlar. Yerel Docker şart değildir.
 
 Yerel geliştirmede Turnstile anahtarlarını boş bırakın; doğrulama kutusu görünmez ve randevu RPC’si bilet istemez. Üretimde `apps/web/.env.example` içindeki üç değişkeni doldurun ve aynı bilet sırrını `private.settings` tablosuna yazın. Aksi halde ya doğrulama kapalı kalır ya da randevu kaydı reddedilir.
 
-Herkese açık sayfalar: `/kvkk` aydınlatma metni, `/gizlilik` gizlilik politikası, `/kosullar` kullanım koşulları. Köşeli parantezli `[DOLDURUN]` alanlarını mağazaya çıkmadan değiştirin. Müşteri randevu formunda aydınlatma onayı zorunludur. Salon sahibi, Salon sayfasından bir telefona ait müşteri verisini silebilir.
+Herkese açık sayfalar: `/kvkk` aydınlatma metni, `/gizlilik` gizlilik politikası, `/kosullar` kullanım koşulları. Şirket unvanı, adres ve e-postalar sayfalara yazılmaz; `apps/web/.env.example` içindeki `NEXT_PUBLIC_COMPANY_NAME`, `NEXT_PUBLIC_COMPANY_ADDRESS`, `NEXT_PUBLIC_CONTACT_EMAIL` ve `NEXT_PUBLIC_KVKK_EMAIL` değişkenlerinden okunur. Müşteri randevu formunda aydınlatma onayı zorunludur. Salon sahibi, Salon sayfasından bir telefona ait müşteri verisini silebilir.
 
 Personel daveti e-posta göndermez. Salon sahibi personel sayfasından bağlantı üretir ve iletir. Personel o e-postayla hesap açınca yalnızca kendi takvimini görür. Üretimde Supabase e-posta onayını açık tutun.
 
@@ -166,7 +167,7 @@ Uygulama kimliği yer tutucudur: iOS bundle `com.berberimrandevu.app`, Android p
 
 Sürüm `1.0.0`. iOS `buildNumber` ve Android `versionCode` başlangıç değeri `1`. Üretim profili bu numaraları EAS üzerinde artırır (`appVersionSource: remote`).
 
-Simge ve açılış görseli `apps/mobile/assets` altındadır. Mağazaya çıkmadan kendi salon görselinizle değiştirin. iOS simgesi 1024×1024, Android adaptive ikonun ön planı da 1024×1024’tür.
+Simge, açılış görseli ve web favicon’u Berberimrandevu markasıyla hazırdır. iOS simgesi 1024×1024 ve saydam değildir. Android adaptive ikonun ön planı ve arka planı `apps/mobile/assets` altındadır.
 
 ### Expo hesabı
 
@@ -206,7 +207,7 @@ eas build -p android --profile preview
 1. [Apple Developer Program](https://developer.apple.com/programs/) üyeliği gerekir (yıllık ücretlidir).
 2. App Store Connect’te yeni bir uygulama açın. Bundle ID, `com.berberimrandevu.app` olmalı. Bu kimliği Apple Developer → Identifiers altında da oluşturun.
 3. Uygulama adı: **Berberimrandevu**. Birincil dil Türkçe olabilir.
-4. Gizlilik politikası URL’si isteyecek. Web’de `/gizlilik` sayfasını yayınlayıp adresini yazın. Sayfadaki `destek@ornek.com` adresini kendi destek e-postanızla değiştirin.
+4. Gizlilik politikası URL’si isteyecek. Web’de `/gizlilik` sayfasını yayınlayıp adresini yazın. Destek e-postası `NEXT_PUBLIC_CONTACT_EMAIL` değişkeninden gelir.
 5. Hesap silme: uygulama içinde **Ayarlar → Hesabı ve salonu sil** vardır. Web panelinde de **Salon** sayfasındadır. İnceleme notuna bu yolu yazın.
 6. Dışa aktarma uyumu: uygulama yalnızca HTTPS kullanır, `ITSAppUsesNonExemptEncryption` kapalıdır. Connect’te “özel şifreleme yok” deyin.
 7. `apps/mobile/eas.json` içindeki `submit.production.ios` alanlarını doldurun:

@@ -31,9 +31,9 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "APPLE_ID_EMAILINIZ",
+        "appleId": "degistirin@example.com",
         "ascAppId": "0000000000",
-        "appleTeamId": "APPLE_TEAM_ID"
+        "appleTeamId": "XXXXXXXXXX"
       },
       "android": {
         "serviceAccountKeyPath": "./google-play-service-account.json",

@@ -1,0 +1,134 @@
+name: Mobil derleme
+
+on:
+  workflow_dispatch:
+    inputs:
+      submit:
+        description: Mağazaya da gönder
+        type: boolean
+        default: false
+      track:
+        description: Google Play kanalı
+        type: choice
+        options:
+          - internal
+          - production
+        default: internal
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Expo anahtarı
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "EXPO_TOKEN secret yok. Expo → Account settings → Access tokens üzerinden oluşturup GitHub secret olarak ekleyin."
+            exit 1
+          fi
+      - name: Expo
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Bağımlılıklar
+        run: pnpm install --frozen-lockfile
+      - name: EAS ortamı
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_PUBLIC_SUPABASE_URL: ${{ secrets.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_ANON_KEY }}
+          EXPO_PUBLIC_SITE_URL: ${{ secrets.EXPO_PUBLIC_SITE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EXPO_TOKEN:-}" ]; then
+            echo "EXPO_TOKEN secret yok. Expo → Account settings → Access tokens üzerinden oluşturup GitHub secret olarak ekleyin."
+            exit 1
+          fi
+          missing=""
+          for name in EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_SITE_URL; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "Eksik GitHub secret:$missing"
+            exit 1
+          fi
+          put() {
+            local key="$1"
+            local value="$2"
+            local visibility="$3"
+            if ! eas env:create --environment production --name "$key" --value "$value" --visibility "$visibility" --non-interactive; then
+              eas env:update --environment production --name "$key" --value "$value" --visibility "$visibility" --non-interactive
+            fi
+          }
+          put EXPO_PUBLIC_SUPABASE_URL "$EXPO_PUBLIC_SUPABASE_URL" plaintext
+          put EXPO_PUBLIC_SUPABASE_ANON_KEY "$EXPO_PUBLIC_SUPABASE_ANON_KEY" sensitive
+          put EXPO_PUBLIC_SITE_URL "$EXPO_PUBLIC_SITE_URL" plaintext
+      - name: Derle
+        working-directory: apps/mobile
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${EAS_PROJECT_ID}" ]; then
+            echo "EAS_PROJECT_ID secret yok. apps/mobile içinde eas init çalıştırıp çıkan kimliği GitHub secret yapın."
+            exit 1
+          fi
+          submit="${{ github.event_name == 'push' || github.event.inputs.submit == 'true' }}"
+          if [ "$submit" = "true" ]; then
+            eas build --platform all --profile production --non-interactive
+          else
+            eas build --platform all --profile production --non-interactive --no-wait
+          fi
+      - name: Mağazaya gönder
+        if: github.event_name == 'push' || github.event.inputs.submit == 'true'
+        working-directory: apps/mobile
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          ASC_APP_ID: ${{ secrets.ASC_APP_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          EXPO_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.EXPO_APPLE_APP_SPECIFIC_PASSWORD }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          PLAY_TRACK: ${{ github.event.inputs.track || 'internal' }}
+        run: |
+          set -euo pipefail
+          missing=""
+          for name in APPLE_ID ASC_APP_ID APPLE_TEAM_ID EXPO_APPLE_APP_SPECIFIC_PASSWORD GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "Gönderim için eksik secret:$missing"
+            exit 1
+          fi
+          node <<'JS'
+          const fs = require("fs");
+          const eas = JSON.parse(fs.readFileSync("eas.json", "utf8"));
+          eas.submit.production.ios.appleId = process.env.APPLE_ID;
+          eas.submit.production.ios.ascAppId = process.env.ASC_APP_ID;
+          eas.submit.production.ios.appleTeamId = process.env.APPLE_TEAM_ID;
+          eas.submit.production.android.track = process.env.PLAY_TRACK || "internal";
+          fs.writeFileSync("eas.json", JSON.stringify(eas, null, 2) + "\n");
+          fs.writeFileSync("google-play-service-account.json", process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON);
+          JS
+          eas submit --platform all --profile production --latest --non-interactive

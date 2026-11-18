@@ -12,12 +12,31 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
 });
 
+const description = "Berberimrandevu, berber salonları için randevu defteridir. Müşteri hesap açmadan gün ve saat seçer.";
+
+function siteUrl(): URL | undefined {
+  const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (!value) return undefined;
+  try {
+    return new URL(value);
+  } catch {
+    return undefined;
+  }
+}
+
 export const metadata: Metadata = {
+  metadataBase: siteUrl(),
   title: {
     default: "Berberimrandevu",
     template: "%s · Berberimrandevu",
   },
-  description: "Berberimrandevu, berber salonları için randevu defteridir. Müşteri hesap açmadan gün ve saat seçer.",
+  description,
+  openGraph: {
+    title: "Berberimrandevu",
+    description,
+    locale: "tr_TR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

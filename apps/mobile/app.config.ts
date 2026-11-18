@@ -28,6 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     versionCode: 1,
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
+      backgroundImage: "./assets/adaptive-icon-background.png",
       backgroundColor: "#241c17",
     },
   },
@@ -44,7 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         image: "./assets/splash-icon.png",
         backgroundColor: "#241c17",
-        imageWidth: 180,
+        imageWidth: 280,
       },
     ],
   ],

@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "pnpm --filter @berber/shared build",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit"
