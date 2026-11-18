@@ -1,4 +1,4 @@
-import { resolveSalonImage } from "@berber/shared";
+import { resolveSalonImage, salonAcceptsBookings } from "@berber/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -35,7 +35,17 @@ export default async function BookingPage({ params }: { params: Promise<{ slug: 
   return (
     <main className="mx-auto max-w-lg px-4 py-8">
       <SalonBanner salon={catalog.salon} logoUrl={logoUrl} coverUrl={coverUrl} />
-      <PublicBooking catalog={catalog} turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? null} />
+      {salonAcceptsBookings({
+        trialEndsAt: catalog.salon.trial_ends_at,
+        paidUntil: catalog.salon.paid_until,
+        suspended: catalog.salon.suspended,
+      }) ? (
+        <PublicBooking catalog={catalog} turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? null} />
+      ) : (
+        <p className="mt-6 rounded-3xl border border-line bg-card px-5 py-6 text-sm leading-6">
+          Bu salon şu anda online randevu almıyor.
+        </p>
+      )}
       <footer className="mt-10 flex flex-wrap items-center gap-3 border-t border-line pt-4 text-xs text-muted">
         <span className="font-serif text-sm text-ink">Berberimrandevu</span>
         <Link href="/gizlilik">Gizlilik</Link>

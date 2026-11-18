@@ -22,6 +22,12 @@ export type Salon = {
   logo_path: string | null;
   cover_path: string | null;
   timezone: string;
+  /** Deneme bu anda biter. Eski kayıtlarda boş olabilir. */
+  trial_ends_at?: string | null;
+  paid_until?: string | null;
+  suspended?: boolean | null;
+  /** Havale açıklamasına yazılan kısa kod. */
+  payment_code?: string | null;
   created_at: string;
   updated_at: string;
 };

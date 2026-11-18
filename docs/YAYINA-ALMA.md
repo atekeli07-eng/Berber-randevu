@@ -36,6 +36,22 @@ Bir alan adınız olsun. Örnek: `berberimrandevu.com`. Yoksa Vercel’in verdi�
 
 `setup.sql`, üç kurulum dosyasını sırayla uygular ve GitHub’ın daha sonra aynı dosyaları yeniden çalıştırmasını engeller. İleride şema değişirse yeni dosyalar `supabase/migrations` içine konur; GitHub, `main` dalına her gönderimde onları yollar. Bunun için bölüm 4’teki üç sırrı eklemiş olmanız gerekir. Sırlar yoksa o adım sessizce atlanır, site bozulmaz.
 
+Abonelik için `setup.sql` yetmez. SQL Editor’e `supabase/migrations/20261118200000_subscriptions.sql` dosyasının tamamını da bir kez yapıştırıp çalıştırın. Üretimde `setup.sql` daha önce çalıştıysa yalnızca bu yeni dosya yeter. İkinci kez çalıştırmayın.
+
+### Kurucu paneli ve ücret
+
+1. Kendi e-postanızla siteden bir hesap açın. Kurucu e-postası salon hesabı da olabilir.
+2. SQL Editor’de şunu çalıştırın. E-postayı kendinizinkiyle değiştirin:
+
+```sql
+select public.grant_platform_admin('atekeli07@gmail.com');
+```
+
+Hesap yoksa sorgu “önce siteden kayıt olun” der. Önce kayıt, sonra bu satır.
+
+3. Tarayıcıda `https://ALANADINIZ/admin` açın. Özet, salon listesi ve **Ücret ve IBAN** görünür. Aylık ücreti TL olarak, IBAN’ı, hesap sahibini, bankayı ve deneme gününü (başlangıç 30) kaydedin. Deneme günü yalnızca bundan sonra açılan salonlara uygulanır.
+4. Salon sahibi panelde **Abonelik** sayfasında ücreti, IBAN’ı ve havale kodunu görür. “Ödemeyi yaptım bildir” deyince sizde bekleyen ödeme çıkar. Onay, süreyi bir ay uzatır. Süre dolunca yeni randevu kapanır; eski randevular durur. Telefonda fiyat ve ödeme linki yoktur; uygulama yalnızca “web panelinden yenileyin” der.
+
 ### Giriş ayarı
 
 **Authentication → Providers → Email** açık kalsın.
