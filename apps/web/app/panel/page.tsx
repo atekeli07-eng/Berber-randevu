@@ -1,4 +1,4 @@
-import { calendarDateInZone, dayBounds, formatDayHeading } from "@berber/shared";
+import { calendarDateInZone, dayBounds, formatDayHeading, formatSalonAddress, resolveSalonImage } from "@berber/shared";
 import { DashboardView, type DashItem } from "@/components/dashboard-view";
 import { toAgendaItem } from "@/lib/agenda";
 import { getOwnerContext } from "@/lib/owner";
@@ -37,7 +37,8 @@ export default async function PanelHome() {
   return (
     <DashboardView
       salonName={salon.name}
-      city={salon.city}
+      city={formatSalonAddress(salon) || salon.city}
+      logoUrl={resolveSalonImage(process.env.NEXT_PUBLIC_SUPABASE_URL, salon.logo_path, salon.updated_at)}
       bookingPath={`/s/${salon.slug}`}
       todayLabel={formatDayHeading(today, salon.timezone)}
       bookedToday={todayItems.filter((item) => item.status === "booked").length}

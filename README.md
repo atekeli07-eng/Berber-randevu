@@ -39,8 +39,8 @@ pnpm install
 ## 3. Migrasyonu çalıştırın
 
 1. Supabase panosunda **SQL Editor**’ü açın.
-2. `supabase/migrations/20261118120000_init.sql` dosyasının tamamını yapıştırın.
-3. **Run** deyin. Hata almadan bitmeli.
+2. `supabase/migrations/20261118120000_init.sql` dosyasının tamamını yapıştırıp çalıştırın.
+3. Ardından `supabase/migrations/20261118140000_salon_branding.sql` dosyasını da aynı şekilde çalıştırın. Bu dosya salon profili alanlarını ve `salon-media` görsel kovasını ekler. Logo ve kapak herkese açıktır; yükleme, değiştirme ve silme yalnızca salon sahibine aittir. Dosyalar en fazla 2 MB, JPG, PNG veya WebP olabilir. Uygulama yüklemeden önce logoyu 512, kapağı 1600 piksele küçültür.
 
 Bu dosya şunları kurar:
 
@@ -54,6 +54,7 @@ Bu dosya şunları kurar:
 - Hesabı silen `delete_owner_account`
 - Salon verisini yalnızca sahibinin değiştirebildiği RLS
 - İleride SMS / WhatsApp / e-posta için `notification_settings` ve `notification_outbox`
+- İkinci migrasyon: ilçe, harita, Instagram, çalışma saati özeti, logo ve kapak; `salon-media` kovası
 
 CLI kullanıyorsanız proje kökünde `supabase link` ve `supabase db push` de aynı dosyayı uygular. Yerel Docker şart değildir.
 
@@ -120,7 +121,7 @@ pnpm --filter mobile start
 
 SDK 58 ile uyumlu Expo Go kuruluysa telefonla QR’ı okuyun. Sürüm uymuyorsa bir sonraki bölümdeki `preview` profiliyle APK veya simülatör derlemesi alın.
 
-Uygulama salon sahibi içindir: giriş, bugünün listesi, personele göre boş saatler, randevu listesi, arama, tamamlama, iptal ve hesap silme. Müşteri bu uygulamadan randevu almaz.
+Uygulama salon sahibi içindir: giriş, bugünün listesi, personele göre boş saatler, randevu listesi, arama, tamamlama, iptal ve hesap silme. Ayarlar ekranından salon adı, adres, telefon, tanıtım, harita, Instagram, çalışma özeti, logo ve kapak güncellenir. Logo telefonun fotoğraf arşivinden seçilir. Müşteri bu uygulamadan randevu almaz.
 
 ## 8. Test ve derleme
 

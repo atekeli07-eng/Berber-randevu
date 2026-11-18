@@ -6,9 +6,18 @@ export type Salon = {
   name: string;
   slug: string;
   phone: string | null;
+  /** Sokak ve kapı numarası. */
   address: string | null;
+  district: string | null;
   city: string | null;
   description: string | null;
+  maps_url: string | null;
+  instagram: string | null;
+  /** Müşteriye görünen kısa çalışma saati özeti. Personel takviminden bağımsızdır. */
+  hours_summary: string | null;
+  /** storage salon-media içindeki nesne yolu, ya da önizlemede yerel bir yol. */
+  logo_path: string | null;
+  cover_path: string | null;
   timezone: string;
   created_at: string;
   updated_at: string;

@@ -11,7 +11,10 @@ export default function PrivacyPage() {
           adresini kendi adresinizle değiştirin: destek@ornek.com
         </p>
         <h2 className="font-serif text-2xl">Salon hesabı</h2>
-        <p>Salon sahibi e-posta ve şifreyle hesap açar. Şifre Supabase Auth üzerinde saklanır, uygulama şifreyi düz metin tutmaz.</p>
+        <p>
+          Salon sahibi e-posta ve şifreyle hesap açar. Şifre Supabase Auth üzerinde saklanır, uygulama şifreyi düz metin
+          tutmaz. Logo ve kapak görseli Supabase Storage üzerinde, herkese açık bir kovada durur.
+        </p>
         <h2 className="font-serif text-2xl">Müşteri randevusu</h2>
         <p>
           Müşteri hesap açmaz. Randevu için ad soyad ve cep telefonu istenir. Bu bilgiler yalnızca ilgili salon

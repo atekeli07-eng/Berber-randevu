@@ -69,9 +69,17 @@ export function formatTurkishMobile(phone: string): string {
 }
 
 export function toTelHref(phone: string): string {
-  const normalized = normalizeTurkishMobile(phone);
-  if (!normalized) return `tel:${phone.replace(/\s/g, "")}`;
-  return `tel:+90${normalized.slice(1)}`;
+  const mobile = normalizeTurkishMobile(phone);
+  if (mobile) return `tel:+90${mobile.slice(1)}`;
+  const digits = phone.replace(/\D/g, "");
+  const national =
+    digits.startsWith("90") && digits.length === 12
+      ? `0${digits.slice(2)}`
+      : digits.startsWith("0") && digits.length === 11
+        ? digits
+        : null;
+  if (national) return `tel:+90${national.slice(1)}`;
+  return `tel:${phone.replace(/\s/g, "")}`;
 }
 
 export function isValidEmail(email: string): boolean {

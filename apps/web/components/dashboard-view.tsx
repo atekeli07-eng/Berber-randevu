@@ -15,6 +15,7 @@ export type DashItem = {
 export function DashboardView({
   salonName,
   city,
+  logoUrl,
   bookingPath,
   todayLabel,
   bookedToday,
@@ -26,6 +27,7 @@ export function DashboardView({
 }: {
   salonName: string;
   city: string | null;
+  logoUrl?: string | null;
   bookingPath: string;
   todayLabel: string;
   bookedToday: number;
@@ -37,10 +39,13 @@ export function DashboardView({
 }) {
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-semibold tracking-[0.18em] text-gold">{todayLabel}</p>
-        <h1 className="mt-1 font-serif text-4xl">{salonName}</h1>
-        {city ? <p className="text-sm text-muted">{city}</p> : null}
+      <div className="flex items-center gap-4">
+        {logoUrl ? <img src={logoUrl} alt="" className="h-16 w-16 rounded-2xl object-cover" /> : null}
+        <div>
+          <p className="text-xs font-semibold tracking-[0.18em] text-gold">{todayLabel}</p>
+          <h1 className="mt-1 font-serif text-4xl">{salonName}</h1>
+          {city ? <p className="text-sm text-muted">{city}</p> : null}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

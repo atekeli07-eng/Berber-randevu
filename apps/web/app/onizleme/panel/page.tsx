@@ -2,7 +2,7 @@
 
 import { AppointmentsBoard } from "@/components/appointments-board";
 import { DashboardView } from "@/components/dashboard-view";
-import { formatDayHeading } from "@berber/shared";
+import { formatDayHeading, formatSalonAddress, resolveSalonImage } from "@berber/shared";
 import { sampleSalon } from "@/lib/sample";
 
 export default function PreviewPanelPage() {
@@ -15,7 +15,8 @@ export default function PreviewPanelPage() {
       </p>
       <DashboardView
         salonName={sample.salon.name}
-        city={sample.salon.city}
+        city={formatSalonAddress(sample.salon)}
+        logoUrl={resolveSalonImage(undefined, sample.salon.logo_path)}
         bookingPath="/onizleme/randevu"
         todayLabel={formatDayHeading(sample.today, sample.salon.timezone)}
         bookedToday={booked.length}

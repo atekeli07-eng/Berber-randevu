@@ -1,6 +1,6 @@
 "use client";
 
-import type { Salon } from "@berber/shared";
+import { resolveSalonImage, type Salon } from "@berber/shared";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -25,12 +25,13 @@ export function PanelShell({
   email,
   children,
 }: {
-  salon: Pick<Salon, "name" | "slug">;
+  salon: Pick<Salon, "name" | "slug" | "logo_path" | "updated_at">;
   email: string;
   children: ReactNode;
 }) {
   const path = usePathname();
   const router = useRouter();
+  const logoUrl = resolveSalonImage(process.env.NEXT_PUBLIC_SUPABASE_URL, salon.logo_path, salon.updated_at);
 
   async function signOut() {
     const supabase = createBrowserSupabase();
@@ -44,6 +45,7 @@ export function PanelShell({
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col bg-bark text-card md:flex">
         <div className="px-6 py-7">
           <p className="text-[11px] tracking-[0.22em] text-card/60">SALON PANELİ</p>
+          {logoUrl ? <img src={logoUrl} alt="" className="mt-4 h-14 w-14 rounded-2xl object-cover" /> : null}
           <p className="mt-2 font-serif text-2xl leading-tight">{salon.name}</p>
           <p className="mt-2 truncate text-xs text-card/60">{email}</p>
         </div>

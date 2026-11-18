@@ -13,6 +13,14 @@ export const MAX_DAYS_AHEAD = 60;
 export const MIN_DURATION_MINUTES = 5;
 export const MAX_DURATION_MINUTES = 480;
 
+/** Yüklemeden önce kabul edilen ham dosya. Küçültme bundan sonra yapılır. */
+export const SALON_IMAGE_INPUT_MAX_BYTES = 8 * 1024 * 1024;
+/** Storage’a yazılan dosyanın üst sınırı. Kova limiti ile aynıdır. */
+export const SALON_IMAGE_MAX_BYTES = 2 * 1024 * 1024;
+export const SALON_LOGO_MAX_EDGE = 512;
+export const SALON_COVER_MAX_EDGE = 1600;
+export const SALON_MEDIA_BUCKET = "salon-media";
+
 export const WEEKDAYS = [
   { value: 1, short: "Pzt", long: "Pazartesi" },
   { value: 2, short: "Sal", long: "Salı" },

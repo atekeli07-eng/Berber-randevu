@@ -1,6 +1,8 @@
+import { resolveSalonImage } from "@berber/shared";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PublicBooking } from "@/components/public-booking";
+import { SalonBanner } from "@/components/salon-banner";
 import { loadPublicCatalog } from "@/lib/catalog";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 
@@ -26,10 +28,12 @@ export default async function BookingPage({ params }: { params: Promise<{ slug: 
   const catalog = await loadPublicCatalog(slug);
   if (!catalog) notFound();
 
+  const logoUrl = resolveSalonImage(process.env.NEXT_PUBLIC_SUPABASE_URL, catalog.salon.logo_path, catalog.salon.updated_at);
+  const coverUrl = resolveSalonImage(process.env.NEXT_PUBLIC_SUPABASE_URL, catalog.salon.cover_path, catalog.salon.updated_at);
+
   return (
     <main className="mx-auto max-w-lg px-4 py-8">
-      <p className="mb-4 text-sm text-muted">{[catalog.salon.city, catalog.salon.address].filter(Boolean).join(" · ")}</p>
-      {catalog.salon.description ? <p className="mb-6 text-sm">{catalog.salon.description}</p> : null}
+      <SalonBanner salon={catalog.salon} logoUrl={logoUrl} coverUrl={coverUrl} />
       <PublicBooking catalog={catalog} />
     </main>
   );

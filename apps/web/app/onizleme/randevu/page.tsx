@@ -1,7 +1,9 @@
 "use client";
 
 import type { BookAppointmentResult } from "@berber/shared";
+import { resolveSalonImage } from "@berber/shared";
 import { BookingWizard } from "@/components/booking-wizard";
+import { SalonBanner } from "@/components/salon-banner";
 import { sampleSalon } from "@/lib/sample";
 
 export default function PreviewBookingPage() {
@@ -11,6 +13,11 @@ export default function PreviewBookingPage() {
       <p className="mb-4 rounded-2xl bg-warn-soft px-3 py-2 text-sm text-gold">
         Örnek veri. Randevu bir salona kaydedilmez.
       </p>
+      <SalonBanner
+        salon={sample.salon}
+        logoUrl={resolveSalonImage(undefined, sample.salon.logo_path)}
+        coverUrl={resolveSalonImage(undefined, sample.salon.cover_path)}
+      />
       <BookingWizard
         {...sample}
         preview

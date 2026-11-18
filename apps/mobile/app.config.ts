@@ -20,6 +20,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     infoPlist: {
       CFBundleDisplayName: "Berber Randevu",
       ITSAppUsesNonExemptEncryption: false,
+      NSPhotoLibraryUsageDescription: "Salon logosu ve kapak görseli seçmek için fotoğraf arşivi kullanılır.",
     },
   },
   android: {
@@ -32,6 +33,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
+    [
+      "expo-image-picker",
+      {
+        photosPermission: "Salon logosu ve kapak görseli seçmek için fotoğraf arşivi kullanılır.",
+      },
+    ],
     [
       "expo-splash-screen",
       {
