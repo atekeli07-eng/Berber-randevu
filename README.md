@@ -1,4 +1,4 @@
-# Berber Randevu
+# Berberimrandevu
 
 Türkiye’deki berber salonları için randevu defteri. Salon sahibi panele girer, hizmetlerini ve ekibini tanımlar, müşterisine tek bir bağlantı verir. Müşteri hesap açmaz; hizmet, berber, gün ve saat seçip adını ve telefonunu bırakır.
 
@@ -162,7 +162,7 @@ Bundan sonra yeni randevu ve iptal, `notification_outbox` tablosuna `pending` sa
 
 ## 10. App Store ve Google Play
 
-Uygulama kimliği yer tutucudur: iOS bundle `com.berberrandevu.app`, Android package aynıdır. Mağazada bu kimlik başkasına aitse `apps/mobile/app.config.ts` içinde ikisini birden değiştirin. Kimlik bir kez yayınlandıktan sonra değişmez.
+Uygulama kimliği yer tutucudur: iOS bundle `com.berberimrandevu.app`, Android package aynıdır. Mağazada bu kimlik başkasına aitse `apps/mobile/app.config.ts` içinde ikisini birden değiştirin. Kimlik bir kez yayınlandıktan sonra değişmez.
 
 Sürüm `1.0.0`. iOS `buildNumber` ve Android `versionCode` başlangıç değeri `1`. Üretim profili bu numaraları EAS üzerinde artırır (`appVersionSource: remote`).
 
@@ -204,8 +204,8 @@ eas build -p android --profile preview
 ### Apple App Store
 
 1. [Apple Developer Program](https://developer.apple.com/programs/) üyeliği gerekir (yıllık ücretlidir).
-2. App Store Connect’te yeni bir uygulama açın. Bundle ID, `com.berberrandevu.app` (veya sizin değiştirdiğiniz kimlik) olmalı. Bu kimliği Apple Developer → Identifiers altında da oluşturun.
-3. Uygulama adı: **Berber Randevu**. Birincil dil Türkçe olabilir.
+2. App Store Connect’te yeni bir uygulama açın. Bundle ID, `com.berberimrandevu.app` olmalı. Bu kimliği Apple Developer → Identifiers altında da oluşturun.
+3. Uygulama adı: **Berberimrandevu**. Birincil dil Türkçe olabilir.
 4. Gizlilik politikası URL’si isteyecek. Web’de `/gizlilik` sayfasını yayınlayıp adresini yazın. Sayfadaki `destek@ornek.com` adresini kendi destek e-postanızla değiştirin.
 5. Hesap silme: uygulama içinde **Ayarlar → Hesabı ve salonu sil** vardır. Web panelinde de **Salon** sayfasındadır. İnceleme notuna bu yolu yazın.
 6. Dışa aktarma uyumu: uygulama yalnızca HTTPS kullanır, `ITSAppUsesNonExemptEncryption` kapalıdır. Connect’te “özel şifreleme yok” deyin.
@@ -227,7 +227,7 @@ Connect’te sürümü incelemeden önce: Türkçe ekran görüntüleri (6,7 in�
 ### Google Play
 
 1. [Google Play Console](https://play.google.com/console) hesabı açın (tek seferlik kayıt ücreti vardır).
-2. Uygulama oluşturun. Paket adı `com.berberrandevu.app` olmalı ve `app.config.ts` ile aynı kalmalı.
+2. Uygulama oluşturun. Paket adı `com.berberimrandevu.app` olmalı ve `app.config.ts` ile aynı kalmalı.
 3. Play Console → **Setup → API access**. Bir Google Cloud hizmet hesabı oluşturup Play’e bağlayın. JSON anahtarını indirin ve `apps/mobile/google-play-service-account.json` olarak koyun. Bu dosya git’e girmez.
 4. İç teste almak için `eas.json` Android gönderimi `internal` kanalındadır. Herkese açmadan önce bu kanalda deneyin. Herkese açacağınız zaman `track` değerini `production` yapın.
 5. Derleyin ve gönderin:

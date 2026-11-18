@@ -11,7 +11,7 @@ export default function PrivacyPage() {
           destek@ornek.com
         </p>
         <p>
-          Berber Randevu, salon sahiplerinin randevu defteridir. Mağazaya çıkmadan önce bu metindeki destek
+          Berberimrandevu, salon sahiplerinin randevu defteridir. Mağazaya çıkmadan önce bu metindeki destek
           adresini kendi adresinizle değiştirin: destek@ornek.com
         </p>
         <h2 className="font-serif text-2xl">Salon hesabı</h2>

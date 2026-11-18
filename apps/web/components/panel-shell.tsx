@@ -47,7 +47,8 @@ export function PanelShell({
     <div className="min-h-screen md:pl-64">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 flex-col bg-bark text-card md:flex">
         <div className="px-6 py-7">
-          <p className="text-[11px] tracking-[0.22em] text-card/60">SALON PANELİ</p>
+          <p className="font-serif text-lg leading-none">Berberimrandevu</p>
+          <p className="mt-1 text-[11px] tracking-[0.18em] text-card/60">SALON PANELİ</p>
           {logoUrl ? <img src={logoUrl} alt="" className="mt-4 h-14 w-14 rounded-2xl object-cover" /> : null}
           <p className="mt-2 font-serif text-2xl leading-tight">{salon.name}</p>
           <p className="mt-2 truncate text-xs text-card/60">{email}</p>

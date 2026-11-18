@@ -36,8 +36,11 @@ export default function HomePage() {
         <Feature title="Çalışma düzeni" text="Haftalık saat, öğle arası ve izin günü. Pazar kapalı başlar." />
         <Feature title="Gün akışı" text="Listede veya gün şeridinde görün. Tamamlandı deyin ya da iptal edin." />
       </section>
-      <footer className="mx-auto flex max-w-6xl flex-wrap gap-4 px-5 pb-10 text-sm text-muted">
+      <footer className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-5 pb-10 text-sm text-muted">
+        <span className="font-serif text-base text-ink">Berberimrandevu</span>
         <Link href="/gizlilik">Gizlilik</Link>
+        <Link href="/kvkk">KVKK</Link>
+        <Link href="/kosullar">Koşullar</Link>
         <Link href="/onizleme">Örnek ekranlar</Link>
       </footer>
     </div>

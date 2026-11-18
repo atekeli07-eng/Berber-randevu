@@ -13,8 +13,11 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Berber Randevu",
-  description: "Berber salonları için randevu defteri. Müşteri hesap açmadan gün ve saat seçer.",
+  title: {
+    default: "Berberimrandevu",
+    template: "%s · Berberimrandevu",
+  },
+  description: "Berberimrandevu, berber salonları için randevu defteridir. Müşteri hesap açmadan gün ve saat seçer.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

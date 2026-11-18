@@ -10,7 +10,7 @@ export default function TermsPage() {
           [DOLDURUN] App Store ve Google Play listesinde bu sayfanın adresini kullanmadan önce şirket ve iletişim bilgilerini güncelleyin.
         </p>
         <p>
-          Berber Randevu, [DOLDURUN] Örnek Berber Yazılım Ltd. Şti. tarafından sunulan bir salon randevu aracıdır. İletişim: [DOLDURUN]
+          Berberimrandevu, [DOLDURUN] Örnek Berber Yazılım Ltd. Şti. tarafından sunulan bir salon randevu aracıdır. İletişim: [DOLDURUN]
           destek@ornek.com
         </p>
         <h2 className="font-serif text-2xl">Hesaplar</h2>

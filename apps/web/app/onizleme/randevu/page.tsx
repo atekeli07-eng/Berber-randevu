@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { BookAppointmentResult } from "@berber/shared";
 import { resolveSalonImage } from "@berber/shared";
 import { BookingWizard } from "@/components/booking-wizard";
@@ -36,6 +37,12 @@ export default function PreviewBookingPage() {
           };
         }}
       />
+      <footer className="mt-10 flex flex-wrap items-center gap-3 border-t border-line pt-4 text-xs text-muted">
+        <span className="font-serif text-sm text-ink">Berberimrandevu</span>
+        <Link href="/gizlilik">Gizlilik</Link>
+        <Link href="/kvkk">KVKK</Link>
+        <Link href="/kosullar">Koşullar</Link>
+      </footer>
     </main>
   );
 }

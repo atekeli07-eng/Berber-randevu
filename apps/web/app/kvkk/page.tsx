@@ -8,6 +8,7 @@ export default function KvkkPage() {
       <main className="mx-auto max-w-2xl space-y-4 px-5 py-8 text-sm leading-6">
         <p className="text-xs font-semibold tracking-[0.16em] text-gold">SÜRÜM {KVKK_CONSENT_VERSION}</p>
         <h1 className="font-serif text-4xl">KVKK aydınlatma metni</h1>
+        <p>Bu metin Berberimrandevu uygulaması ve web sitesi için hazırlanmıştır.</p>
         <p className="rounded-2xl bg-warn-soft px-3 py-2 text-gold">
           [DOLDURUN] Bu metindeki şirket unvanı, adres, e-posta ve veri sorumlusu bilgilerini yayına almadan kendi bilgilerinizle değiştirin.
         </p>

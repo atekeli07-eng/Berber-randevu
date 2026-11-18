@@ -46,7 +46,7 @@ export default function LoginScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.body}>
-        <Text style={styles.brand}>BERBER</Text>
+        <Text style={styles.brand}>Berberimrandevu</Text>
         <ScreenTitle title="Panele gir" kicker="SALON SAHİBİ" />
         {configError ? <Text style={styles.error}>{configError}</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -70,7 +70,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.paper },
   body: { padding: 24, gap: 8 },
-  brand: { letterSpacing: 3, fontSize: 12, fontWeight: "700", marginBottom: 12 },
+  brand: { fontSize: 22, fontWeight: "700", marginBottom: 12, color: colors.ink },
   label: { marginTop: 8, fontWeight: "600" },
   input: {
     backgroundColor: colors.card,

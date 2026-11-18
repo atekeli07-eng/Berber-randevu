@@ -1,5 +1,6 @@
 import { resolveSalonImage } from "@berber/shared";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PublicBooking } from "@/components/public-booking";
 import { SalonBanner } from "@/components/salon-banner";
@@ -12,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   if (!hasSupabaseEnv()) return { title: "Randevu" };
   const catalog = await loadPublicCatalog(slug);
-  return { title: catalog ? `${catalog.salon.name} randevu` : "Salon bulunamadı" };
+  return { title: catalog ? catalog.salon.name : "Salon bulunamadı" };
 }
 
 export default async function BookingPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,6 +36,12 @@ export default async function BookingPage({ params }: { params: Promise<{ slug: 
     <main className="mx-auto max-w-lg px-4 py-8">
       <SalonBanner salon={catalog.salon} logoUrl={logoUrl} coverUrl={coverUrl} />
       <PublicBooking catalog={catalog} turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? null} />
+      <footer className="mt-10 flex flex-wrap items-center gap-3 border-t border-line pt-4 text-xs text-muted">
+        <span className="font-serif text-sm text-ink">Berberimrandevu</span>
+        <Link href="/gizlilik">Gizlilik</Link>
+        <Link href="/kvkk">KVKK</Link>
+        <Link href="/kosullar">Koşullar</Link>
+      </footer>
     </main>
   );
 }

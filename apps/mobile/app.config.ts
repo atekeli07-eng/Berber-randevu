@@ -4,27 +4,27 @@ const projectId = process.env.EAS_PROJECT_ID ?? "00000000-0000-0000-0000-0000000
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: "Berber Randevu",
-  slug: "berber-randevu",
+  name: "Berberimrandevu",
+  slug: "berberimrandevu",
   version: "1.0.0",
   orientation: "portrait",
   icon: "./assets/icon.png",
-  scheme: "berberrandevu",
+  scheme: "berberimrandevu",
   userInterfaceStyle: "light",
   backgroundColor: "#241c17",
   primaryColor: "#8d3d28",
   ios: {
-    bundleIdentifier: "com.berberrandevu.app",
+    bundleIdentifier: "com.berberimrandevu.app",
     buildNumber: "1",
     supportsTablet: true,
     infoPlist: {
-      CFBundleDisplayName: "Berber Randevu",
+      CFBundleDisplayName: "Berberimrandevu",
       ITSAppUsesNonExemptEncryption: false,
       NSPhotoLibraryUsageDescription: "Salon logosu ve kapak görseli seçmek için fotoğraf arşivi kullanılır.",
     },
   },
   android: {
-    package: "com.berberrandevu.app",
+    package: "com.berberimrandevu.app",
     versionCode: 1,
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon.png",
