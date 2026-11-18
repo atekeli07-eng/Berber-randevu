@@ -12,7 +12,8 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
 });
 
-const description = "Berberimrandevu, berber salonları için randevu defteridir. Müşteri hesap açmadan gün ve saat seçer.";
+const description =
+  "Berberimrandevu, erkek kuaförü ve berber salonları için randevu sayfasıdır. Müşteri hesap açmadan gün ve saat seçer.";
 
 function siteUrl(): URL | undefined {
   const value = process.env.NEXT_PUBLIC_SITE_URL?.trim();
