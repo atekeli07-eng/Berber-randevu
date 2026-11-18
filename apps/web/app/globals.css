@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), ui-serif, Georgia, serif;
+  --color-ink: #1c1612;
+  --color-paper: #f3eee6;
+  --color-card: #fffaf3;
+  --color-line: #e4d8c6;
+  --color-muted: #6f645a;
+  --color-bark: #241c17;
+  --color-clay: #8d3d28;
+  --color-clay-dark: #6f2e1d;
+  --color-gold: #8d6a34;
+  --color-good: #1e6a45;
+  --color-good-soft: #e5f3eb;
+  --color-bad: #8d2e2e;
+  --color-bad-soft: #f8e8e4;
+  --color-warn-soft: #f8efd8;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  ::selection {
+    background: #e7c7b8;
+  }
+
+  input,
+  button,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
+
+@utility hero-wash {
+  background:
+    radial-gradient(900px 420px at 100% -10%, rgba(141, 61, 40, 0.18), transparent 55%),
+    radial-gradient(640px 360px at -10% 10%, rgba(141, 106, 52, 0.16), transparent 50%),
+    var(--color-paper);
+}

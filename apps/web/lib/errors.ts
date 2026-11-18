@@ -1,0 +1,1 @@
+export { translateAuthError, translateError } from "@berber/shared";
