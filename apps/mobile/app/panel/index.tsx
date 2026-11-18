@@ -1,8 +1,13 @@
 import {
+  SUBSCRIPTION_STATUS_LABEL,
+  accessEndsAt,
   formatSlotTime,
   formatTurkishMobile,
   getAvailableSlots,
+  salonAcceptsBookings,
+  subscriptionStatus,
   toTelHref,
+  wholeDaysLeft,
 } from "@berber/shared";
 import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
@@ -70,6 +75,15 @@ export default function TodayScreen() {
         })
       : [];
 
+  const billing = salon
+    ? { trialEndsAt: salon.trial_ends_at, paidUntil: salon.paid_until, suspended: salon.suspended }
+    : null;
+  const billingEnd = billing && salonAcceptsBookings(billing) ? accessEndsAt(billing) : null;
+  const billingLabel =
+    billing && billingEnd
+      ? `${SUBSCRIPTION_STATUS_LABEL[subscriptionStatus(billing)]} · ${wholeDaysLeft(billingEnd)} gün kaldı`
+      : null;
+
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView
@@ -77,6 +91,7 @@ export default function TodayScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={async () => { setRefreshing(true); await load(); setRefreshing(false); }} />}
       >
         <ScreenTitle kicker="BUGÜN" title={salon?.name ?? "Salon"} />
+        {billingLabel ? <Text style={styles.muted}>{billingLabel}</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
           <Chip label="Tümü" active={staffId === "all"} onPress={() => setStaffId("all")} />

@@ -46,6 +46,10 @@ export function sampleSalon(now = new Date()): {
     logo_path: "/ornek-logo.png",
     cover_path: "/ornek-kapak.png",
     timezone: TZ,
+    trial_ends_at: new Date(now.getTime() + 20 * 86_400_000).toISOString(),
+    paid_until: null,
+    suspended: false,
+    payment_code: "ORNEK01",
     created_at: stamp,
     updated_at: stamp,
   };

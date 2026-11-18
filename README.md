@@ -61,6 +61,14 @@ Bu dosya şunları kurar:
 
 CLI kullanıyorsanız proje kökünde `supabase link` ve `supabase db push` aynı şemayı `supabase/migrations` dosyalarından kurar. `setup.sql` ile kurulumu yaptıysanız `db push` bu üç dosyayı atlar. Yerel Docker şart değildir.
 
+Abonelik migrasyonu `supabase/migrations/20261118200000_subscriptions.sql` dosyasıdır. `setup.sql` bunu içermez; SQL Editor’de bu dosyayı da bir kez çalıştırın. Yeni salon 30 gün dener. Süre `platform_settings` tablosundaki ücret, IBAN ve deneme gününden okunur. Kurucu, kendi e-postasıyla kayıt olduktan sonra şunu çalıştırır:
+
+```sql
+select public.grant_platform_admin('atekeli07@gmail.com');
+```
+
+Ardından `/admin` adresinden ücreti ve IBAN’ı kaydeder. Ayrıntı `docs/YAYINA-ALMA.md` içindedir.
+
 Yerel geliştirmede Turnstile anahtarlarını boş bırakın; doğrulama kutusu görünmez ve randevu RPC’si bilet istemez. Üretimde `apps/web/.env.example` içindeki üç değişkeni doldurun ve aynı bilet sırrını `private.settings` tablosuna yazın. Aksi halde ya doğrulama kapalı kalır ya da randevu kaydı reddedilir.
 
 Herkese açık sayfalar: `/kvkk` aydınlatma metni, `/gizlilik` gizlilik politikası, `/kosullar` kullanım koşulları. Şirket unvanı, adres ve e-postalar sayfalara yazılmaz; `apps/web/.env.example` içindeki `NEXT_PUBLIC_COMPANY_NAME`, `NEXT_PUBLIC_COMPANY_ADDRESS`, `NEXT_PUBLIC_CONTACT_EMAIL` ve `NEXT_PUBLIC_KVKK_EMAIL` değişkenlerinden okunur. Müşteri randevu formunda aydınlatma onayı zorunludur. Salon sahibi, Salon sayfasından bir telefona ait müşteri verisini silebilir.

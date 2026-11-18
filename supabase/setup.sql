@@ -1902,3 +1902,11 @@ values
   ('20261118140000', 'salon_branding'),
   ('20261118160000', 'launch_rules')
 on conflict (version) do nothing;
+
+-- “Grant API access to new tables automatically” kapalı projelerde de panel
+-- salon satırını okuyabilsin. RLS açık kalır. Tekrar çalıştırmak güvenlidir.
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;

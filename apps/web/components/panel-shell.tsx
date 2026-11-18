@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/panel/hizmetler", label: "Hizmet" },
   { href: "/panel/personel", label: "Ekip" },
   { href: "/panel/salon", label: "Salon" },
+  { href: "/panel/abonelik", label: "Abonelik" },
 ];
 
 function isActive(href: string, path: string): boolean {
@@ -34,7 +35,8 @@ export function PanelShell({
   const path = usePathname();
   const router = useRouter();
   const logoUrl = resolveSalonImage(process.env.NEXT_PUBLIC_SUPABASE_URL, salon.logo_path, salon.updated_at);
-  const links = role === "owner" ? LINKS : LINKS.filter((link) => link.href === "/panel" || link.href === "/panel/randevular");
+  const links =
+    role === "owner" ? LINKS : LINKS.filter((link) => link.href === "/panel" || link.href === "/panel/randevular");
 
   async function signOut() {
     const supabase = createBrowserSupabase();
@@ -74,7 +76,10 @@ export function PanelShell({
 
       <div className="mx-auto w-full max-w-5xl px-4 py-6 pb-28 md:px-8 md:pb-10">{children}</div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-line bg-card md:hidden">
+      <nav
+        className="fixed inset-x-0 bottom-0 z-20 grid border-t border-line bg-card md:hidden"
+        style={{ gridTemplateColumns: `repeat(${links.length}, minmax(0, 1fr))` }}
+      >
         {links.map((link) => (
           <Link
             key={link.href}
