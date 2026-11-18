@@ -31,6 +31,33 @@ function relatedName(value: unknown): string {
   return "";
 }
 
+export type AccessRole = "owner" | "staff";
+
+export async function loadAccess(): Promise<{ role: AccessRole; salon: Salon; staffId: string | null }> {
+  const supabase = getSupabase();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) throw new Error("Oturum bulunamadı. Tekrar giriş yapın.");
+  await supabase.rpc("accept_staff_invite", { p_token: null }).then(
+    () => undefined,
+    () => undefined,
+  );
+  const { data: owned, error: ownedError } = await supabase.from("salons").select("*").eq("owner_id", userData.user.id).maybeSingle();
+  if (ownedError) throw new Error(translateError(ownedError));
+  if (owned) return { role: "owner", salon: owned as Salon, staffId: null };
+  const { data: staffRow, error: staffError } = await supabase
+    .from("staff")
+    .select("id, salon_id")
+    .eq("user_id", userData.user.id)
+    .eq("active", true)
+    .maybeSingle();
+  if (staffError) throw new Error(translateError(staffError));
+  if (!staffRow) throw new Error("Bu hesaba bağlı salon yok.");
+  const { data: salonRow, error: salonError } = await supabase.from("salons").select("*").eq("id", staffRow.salon_id).maybeSingle();
+  if (salonError) throw new Error(translateError(salonError));
+  if (!salonRow) throw new Error("Bu hesaba bağlı salon yok.");
+  return { role: "staff", salon: salonRow as Salon, staffId: String(staffRow.id) };
+}
+
 export async function loadSalonGraph(): Promise<{
   salon: Salon;
   staff: Staff[];

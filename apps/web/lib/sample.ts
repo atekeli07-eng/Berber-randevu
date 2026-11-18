@@ -40,6 +40,9 @@ export function sampleSalon(now = new Date()): {
     maps_url: "https://maps.app.goo.gl/ornek",
     instagram: "sakalmakas",
     hours_summary: "Salı–cumartesi 10:00–20:00, pazar kapalı",
+    max_active_bookings: 3,
+    max_daily_bookings: 1,
+    cancellation_cutoff_hours: 3,
     logo_path: "/ornek-logo.png",
     cover_path: "/ornek-kapak.png",
     timezone: TZ,
@@ -115,6 +118,7 @@ function person(id: string, name: string, title: string, stamp: string): Staff {
     name,
     title,
     active: true,
+    user_id: null,
     created_at: stamp,
     updated_at: stamp,
   };

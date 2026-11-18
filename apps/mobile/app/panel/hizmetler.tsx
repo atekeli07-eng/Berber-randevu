@@ -8,13 +8,14 @@ import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { loadSalonGraph } from "@/src/data";
+import { loadAccess, loadSalonGraph } from "@/src/data";
 import { countServiceAppointments, deleteService, insertService, loadServices, updateService } from "@/src/services";
 import { colors } from "@/src/theme";
 import { ActionButton, ScreenTitle } from "@/src/ui";
 
 export default function ServicesScreen() {
   const [salonId, setSalonId] = useState<string | null>(null);
+  const [role, setRole] = useState<"owner" | "staff" | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -26,6 +27,13 @@ export default function ServicesScreen() {
 
   const load = useCallback(async () => {
     try {
+      const access = await loadAccess();
+      setRole(access.role);
+      if (access.role !== "owner") {
+        setServices([]);
+        setError(null);
+        return;
+      }
       const graph = await loadSalonGraph();
       const rows = await loadServices(graph.salon.id);
       setSalonId(graph.salon.id);
@@ -137,6 +145,7 @@ export default function ServicesScreen() {
       price={price}
       description={description}
       pending={pending}
+      role={role}
       onRefresh={async () => {
         setRefreshing(true);
         await load();
@@ -163,6 +172,7 @@ export function ServicesPanel({
   price,
   description,
   pending,
+  role,
   onRefresh,
   onName,
   onDuration,
@@ -181,6 +191,7 @@ export function ServicesPanel({
   price: string;
   description: string;
   pending: boolean;
+  role: "owner" | "staff" | null;
   onRefresh: () => Promise<void>;
   onName: (value: string) => void;
   onDuration: (value: string) => void;
@@ -198,15 +209,18 @@ export function ServicesPanel({
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />}
       >
         <ScreenTitle title="Hizmetler" kicker="SALON" />
-        <Text style={styles.muted}>Süre müsait saatleri belirler. Fiyat TL olarak yazılır.</Text>
+        {role === "staff" ? <Text style={styles.muted}>Hizmetleri yalnızca salon sahibi yönetir.</Text> : null}
+        {role === "owner" ? <Text style={styles.muted}>Süre müsait saatleri belirler. Fiyat TL olarak yazılır.</Text> : null}
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        <View style={styles.card}>
-          <Field label="Ad" value={name} onChangeText={onName} placeholder="Saç kesimi" />
-          <Field label="Süre (dakika)" value={duration} onChangeText={onDuration} keyboard="number-pad" />
-          <Field label="Fiyat (TL)" value={price} onChangeText={onPrice} keyboard="decimal-pad" />
-          <Field label="Açıklama" value={description} onChangeText={onDescription} placeholder="İsteğe bağlı" />
-          <ActionButton label={pending ? "Ekleniyor…" : "Hizmet ekle"} onPress={onAdd} disabled={pending} />
-        </View>
+        {role === "owner" ? (
+          <View style={styles.card}>
+            <Field label="Ad" value={name} onChangeText={onName} placeholder="Saç kesimi" />
+            <Field label="Süre (dakika)" value={duration} onChangeText={onDuration} keyboard="number-pad" />
+            <Field label="Fiyat (TL)" value={price} onChangeText={onPrice} keyboard="decimal-pad" />
+            <Field label="Açıklama" value={description} onChangeText={onDescription} placeholder="İsteğe bağlı" />
+            <ActionButton label={pending ? "Ekleniyor…" : "Hizmet ekle"} onPress={onAdd} disabled={pending} />
+          </View>
+        ) : null}
         {services.length === 0 ? <Text style={styles.muted}>Henüz hizmet yok.</Text> : null}
         {services.map((service) => (
           <ServiceCard key={service.id} service={service} onSave={onSave} onToggle={onToggle} onRemove={onRemove} />

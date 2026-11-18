@@ -23,15 +23,18 @@ function isActive(href: string, path: string): boolean {
 export function PanelShell({
   salon,
   email,
+  role = "owner",
   children,
 }: {
   salon: Pick<Salon, "name" | "slug" | "logo_path" | "updated_at">;
   email: string;
+  role?: "owner" | "staff";
   children: ReactNode;
 }) {
   const path = usePathname();
   const router = useRouter();
   const logoUrl = resolveSalonImage(process.env.NEXT_PUBLIC_SUPABASE_URL, salon.logo_path, salon.updated_at);
+  const links = role === "owner" ? LINKS : LINKS.filter((link) => link.href === "/panel" || link.href === "/panel/randevular");
 
   async function signOut() {
     const supabase = createBrowserSupabase();
@@ -50,7 +53,7 @@ export function PanelShell({
           <p className="mt-2 truncate text-xs text-card/60">{email}</p>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -71,7 +74,7 @@ export function PanelShell({
       <div className="mx-auto w-full max-w-5xl px-4 py-6 pb-28 md:px-8 md:pb-10">{children}</div>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-line bg-card md:hidden">
-        {LINKS.map((link) => (
+        {links.map((link) => (
           <Link
             key={link.href}
             href={link.href}

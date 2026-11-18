@@ -34,7 +34,7 @@ export default async function BookingPage({ params }: { params: Promise<{ slug: 
   return (
     <main className="mx-auto max-w-lg px-4 py-8">
       <SalonBanner salon={catalog.salon} logoUrl={logoUrl} coverUrl={coverUrl} />
-      <PublicBooking catalog={catalog} />
+      <PublicBooking catalog={catalog} turnstileSiteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? null} />
     </main>
   );
 }

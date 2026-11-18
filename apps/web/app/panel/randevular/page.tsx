@@ -8,7 +8,7 @@ import {
 } from "@berber/shared";
 import { AppointmentsBoard } from "@/components/appointments-board";
 import { toAgendaItem } from "@/lib/agenda";
-import { getOwnerContext } from "@/lib/owner";
+import { getAccessContext } from "@/lib/owner";
 
 export const dynamic = "force-dynamic";
 
@@ -18,23 +18,25 @@ export default async function AppointmentsPage({
   searchParams: Promise<{ tarih?: string }>;
 }) {
   const params = await searchParams;
-  const { supabase, salon } = await getOwnerContext();
+  const { supabase, salon, role, staffId } = await getAccessContext();
   const today = calendarDateInZone(new Date(), salon.timezone);
   const date = params.tarih && /^\d{4}-\d{2}-\d{2}$/.test(params.tarih) ? params.tarih : today;
   const bounds = dayBounds(date, salon.timezone);
 
+  let appointmentQuery = supabase
+    .from("appointments")
+    .select("*, staff(name), services(name)")
+    .eq("salon_id", salon.id)
+    .gte("starts_at", bounds.start.toISOString())
+    .lt("starts_at", bounds.end.toISOString())
+    .order("starts_at");
+  if (staffId) appointmentQuery = appointmentQuery.eq("staff_id", staffId);
   const [{ data: staffRows }, { data: serviceRows }, { data: appointmentRows }] = await Promise.all([
     supabase.from("staff").select("*").eq("salon_id", salon.id).order("name"),
     supabase.from("services").select("*").eq("salon_id", salon.id).order("sort_order"),
-    supabase
-      .from("appointments")
-      .select("*, staff(name), services(name)")
-      .eq("salon_id", salon.id)
-      .gte("starts_at", bounds.start.toISOString())
-      .lt("starts_at", bounds.end.toISOString())
-      .order("starts_at"),
+    appointmentQuery,
   ]);
-  const staff = (staffRows ?? []) as Staff[];
+  const staff = ((staffRows ?? []) as Staff[]).filter((person) => role === "owner" || person.id === staffId);
   const staffIds = staff.map((person) => person.id);
   const [{ data: hourRows }, { data: offRows }] =
     staffIds.length === 0
@@ -49,7 +51,7 @@ export default async function AppointmentsPage({
   return (
     <AppointmentsBoard
       salon={salon}
-      staff={(staffRows ?? []) as Staff[]}
+      staff={staff}
       services={(serviceRows ?? []) as Service[]}
       workingHours={hours}
       daysOff={offs}

@@ -32,6 +32,7 @@ export default function PreviewBookingPage() {
             service_name: service?.name ?? "Hizmet",
             staff_name: person?.name ?? "Berber",
             salon_name: sample.salon.name,
+            manage_token: "ornek-yonetim-baglantisi",
           };
         }}
       />

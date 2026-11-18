@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { translateError } from "@/lib/errors";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
+import { StaffInvite } from "./staff-invite";
 import { Button, Card, Field, Notice, inputClass } from "./ui";
 
 type Shift = { start: string; end: string };
@@ -255,6 +256,9 @@ export function StaffEditor({
             </li>
           ))}
         </ul>
+      </Card>
+      <Card>
+        <StaffInvite staffId={staff.id} />
       </Card>
       <Button type="button" variant="danger" onClick={removeStaff}>
         Personeli sil

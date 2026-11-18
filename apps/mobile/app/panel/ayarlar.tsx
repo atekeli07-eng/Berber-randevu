@@ -8,7 +8,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import { Image, ScrollView, Share, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { loadSalonGraph } from "@/src/data";
+import { loadAccess, loadSalonGraph } from "@/src/data";
 import { pickAndUploadSalonImage } from "@/src/media";
 import { getSupabase } from "@/src/supabase";
 import { colors } from "@/src/theme";
@@ -31,11 +31,14 @@ export default function SettingsScreen() {
   const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [loadedId, setLoadedId] = useState<string | null>(null);
+  const [role, setRole] = useState<"owner" | "staff">("owner");
 
   const load = useCallback(async () => {
     try {
+      const access = await loadAccess();
+      setRole(access.role);
       const graph = await loadSalonGraph();
-      setSalon(graph.salon);
+      setSalon(access.role === "owner" ? graph.salon : access.salon);
       if (loadedId !== graph.salon.id) {
         setName(graph.salon.name);
         setPhone(graph.salon.phone ?? "");
@@ -151,29 +154,34 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={["top"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <ScreenTitle title="Ayarlar" kicker={salon?.city ?? "SALON"} />
-        {logoUrl ? <Image source={{ uri: logoUrl }} style={styles.logo} /> : null}
+        <ScreenTitle title="Ayarlar" kicker={role === "staff" ? "PERSONEL" : (salon?.city ?? "SALON")} />
+        {role === "staff" ? <Text style={styles.muted}>Bu hesap yalnızca kendi randevularınızı görür. Salon ayarları sahibe aittir.</Text> : null}
+        {role === "owner" && logoUrl ? <Image source={{ uri: logoUrl }} style={styles.logo} /> : null}
         <Text style={styles.name}>{salon?.name ?? "…"}</Text>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {info ? <Text style={styles.info}>{info}</Text> : null}
-        <Field label="Salon adı" value={name} onChangeText={setName} />
-        <Field label="Telefon" value={phone} onChangeText={setPhone} keyboard="phone-pad" />
-        <Field label="Sokak" value={address} onChangeText={setAddress} />
-        <Field label="İlçe" value={district} onChangeText={setDistrict} />
-        <Field label="Şehir" value={city} onChangeText={setCity} />
-        <Field label="Tanıtım" value={description} onChangeText={setDescription} multiline />
-        <Field label="Çalışma saati özeti" value={hoursSummary} onChangeText={setHoursSummary} />
-        <Field label="Google Maps bağlantısı" value={mapsUrl} onChangeText={setMapsUrl} />
-        <Field label="Instagram" value={instagram} onChangeText={setInstagram} />
-        <ActionButton label={pending ? "Kaydediliyor…" : "Bilgileri kaydet"} onPress={saveProfile} disabled={pending} />
-        <ActionButton label="Logo seç" onPress={() => chooseImage("logo")} disabled={pending} />
-        <ActionButton tone="ghost" label="Kapak görseli seç" onPress={() => chooseImage("cover")} disabled={pending} />
+        {role === "owner" ? (
+          <>
+            <Field label="Salon adı" value={name} onChangeText={setName} />
+            <Field label="Telefon" value={phone} onChangeText={setPhone} keyboard="phone-pad" />
+            <Field label="Sokak" value={address} onChangeText={setAddress} />
+            <Field label="İlçe" value={district} onChangeText={setDistrict} />
+            <Field label="Şehir" value={city} onChangeText={setCity} />
+            <Field label="Tanıtım" value={description} onChangeText={setDescription} multiline />
+            <Field label="Çalışma saati özeti" value={hoursSummary} onChangeText={setHoursSummary} />
+            <Field label="Google Maps bağlantısı" value={mapsUrl} onChangeText={setMapsUrl} />
+            <Field label="Instagram" value={instagram} onChangeText={setInstagram} />
+            <ActionButton label={pending ? "Kaydediliyor…" : "Bilgileri kaydet"} onPress={saveProfile} disabled={pending} />
+            <ActionButton label="Logo seç" onPress={() => chooseImage("logo")} disabled={pending} />
+            <ActionButton tone="ghost" label="Kapak görseli seç" onPress={() => chooseImage("cover")} disabled={pending} />
+            <Text style={styles.dangerTitle}>Hesabı sil</Text>
+            <Text style={styles.muted}>Salon, ekip, görseller ve randevular silinir. Onay için salon adını yazın.</Text>
+            <TextInput style={styles.input} value={confirm} onChangeText={setConfirm} placeholder={salon?.name ?? "Salon adı"} />
+            <ActionButton tone="danger" label={pending ? "Siliniyor…" : "Hesabı ve salonu sil"} onPress={removeAccount} disabled={pending} />
+          </>
+        ) : null}
         <ActionButton tone="ghost" label="Randevu bağlantısını paylaş" onPress={shareLink} />
         <ActionButton tone="ghost" label="Çıkış yap" onPress={signOut} />
-        <Text style={styles.dangerTitle}>Hesabı sil</Text>
-        <Text style={styles.muted}>Salon, ekip, görseller ve randevular silinir. Onay için salon adını yazın.</Text>
-        <TextInput style={styles.input} value={confirm} onChangeText={setConfirm} placeholder={salon?.name ?? "Salon adı"} />
-        <ActionButton tone="danger" label={pending ? "Siliniyor…" : "Hesabı ve salonu sil"} onPress={removeAccount} disabled={pending} />
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,22 +1,24 @@
 import { calendarDateInZone, dayBounds, formatDayHeading, formatSalonAddress, resolveSalonImage } from "@berber/shared";
 import { DashboardView, type DashItem } from "@/components/dashboard-view";
 import { toAgendaItem } from "@/lib/agenda";
-import { getOwnerContext } from "@/lib/owner";
+import { getAccessContext } from "@/lib/owner";
 
 export const dynamic = "force-dynamic";
 
 export default async function PanelHome() {
-  const { supabase, salon } = await getOwnerContext();
+  const { supabase, salon, role, staffId } = await getAccessContext();
   const today = calendarDateInZone(new Date(), salon.timezone);
   const bounds = dayBounds(today, salon.timezone);
+  let appointmentQuery = supabase
+    .from("appointments")
+    .select("*, staff(name), services(name)")
+    .eq("salon_id", salon.id)
+    .gte("starts_at", bounds.start.toISOString())
+    .lt("starts_at", bounds.end.toISOString())
+    .order("starts_at");
+  if (staffId) appointmentQuery = appointmentQuery.eq("staff_id", staffId);
   const [{ data: appointmentRows }, { count: staffCount }, { count: serviceCount }] = await Promise.all([
-    supabase
-      .from("appointments")
-      .select("*, staff(name), services(name)")
-      .eq("salon_id", salon.id)
-      .gte("starts_at", bounds.start.toISOString())
-      .lt("starts_at", bounds.end.toISOString())
-      .order("starts_at"),
+    appointmentQuery,
     supabase.from("staff").select("id", { count: "exact", head: true }).eq("salon_id", salon.id).eq("active", true),
     supabase.from("services").select("id", { count: "exact", head: true }).eq("salon_id", salon.id).eq("active", true),
   ]);

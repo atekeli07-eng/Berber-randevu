@@ -31,10 +31,13 @@ export const WEEKDAYS = [
   { value: 0, short: "Paz", long: "Pazar" },
 ] as const;
 
+export const KVKK_CONSENT_VERSION = "2026-11-18";
+
 export const APPOINTMENT_STATUS = {
   booked: "booked",
   done: "done",
   cancelled: "cancelled",
+  blocked: "blocked",
 } as const;
 
 export type AppointmentStatus = (typeof APPOINTMENT_STATUS)[keyof typeof APPOINTMENT_STATUS];
@@ -43,4 +46,5 @@ export const APPOINTMENT_STATUS_LABEL: Record<AppointmentStatus, string> = {
   booked: "Rezerve",
   done: "Tamamlandı",
   cancelled: "İptal",
+  blocked: "Kapalı",
 };

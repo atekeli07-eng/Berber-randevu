@@ -5,7 +5,11 @@ export default function PrivacyPage() {
     <div>
       <PublicHeader />
       <main className="mx-auto max-w-2xl space-y-4 px-5 py-8 text-sm leading-6">
-        <h1 className="font-serif text-4xl">Gizlilik</h1>
+        <h1 className="font-serif text-4xl">Gizlilik politikası</h1>
+        <p className="rounded-2xl bg-warn-soft px-3 py-2 text-gold">
+          [DOLDURUN] Mağaza listelemesinde bu sayfayı kullanmadan önce şirket unvanı ve destek e-postasını değiştirin: Örnek Berber Yazılım Ltd. Şti. /
+          destek@ornek.com
+        </p>
         <p>
           Berber Randevu, salon sahiplerinin randevu defteridir. Mağazaya çıkmadan önce bu metindeki destek
           adresini kendi adresinizle değiştirin: destek@ornek.com

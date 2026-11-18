@@ -41,6 +41,7 @@ pnpm install
 1. Supabase panosunda **SQL Editor**’ü açın.
 2. `supabase/migrations/20261118120000_init.sql` dosyasının tamamını yapıştırıp çalıştırın.
 3. Ardından `supabase/migrations/20261118140000_salon_branding.sql` dosyasını da aynı şekilde çalıştırın. Bu dosya salon profili alanlarını ve `salon-media` görsel kovasını ekler. Logo ve kapak herkese açıktır; yükleme, değiştirme ve silme yalnızca salon sahibine aittir. Dosyalar en fazla 2 MB, JPG, PNG veya WebP olabilir. Uygulama yüklemeden önce logoyu 512, kapağı 1600 piksele küçültür.
+4. Son olarak `supabase/migrations/20261118160000_launch_rules.sql` dosyasını çalıştırın. Spam sınırları, müşteri iptal bağlantısı, KVKK onay kaydı, manuel randevu, saat kapatma ve personel hesapları bu dosyadadır.
 
 Bu dosya şunları kurar:
 
@@ -55,8 +56,15 @@ Bu dosya şunları kurar:
 - Salon verisini yalnızca sahibinin değiştirebildiği RLS
 - İleride SMS / WhatsApp / e-posta için `notification_settings` ve `notification_outbox`
 - İkinci migrasyon: ilçe, harita, Instagram, çalışma saati özeti, logo ve kapak; `salon-media` kovası
+- Üçüncü migrasyon `20261118160000_launch_rules.sql`: telefon ve IP sınırı, müşteri iptal bağlantısı, KVKK onayı, manuel randevu ve saat kapatma, personel daveti ve rol bazlı RLS
 
 CLI kullanıyorsanız proje kökünde `supabase link` ve `supabase db push` de aynı dosyayı uygular. Yerel Docker şart değildir.
+
+Yerel geliştirmede Turnstile anahtarlarını boş bırakın; doğrulama kutusu görünmez ve randevu RPC’si bilet istemez. Üretimde `apps/web/.env.example` içindeki üç değişkeni doldurun ve aynı bilet sırrını `private.settings` tablosuna yazın. Aksi halde ya doğrulama kapalı kalır ya da randevu kaydı reddedilir.
+
+Herkese açık sayfalar: `/kvkk` aydınlatma metni, `/gizlilik` gizlilik politikası, `/kosullar` kullanım koşulları. Köşeli parantezli `[DOLDURUN]` alanlarını mağazaya çıkmadan değiştirin. Müşteri randevu formunda aydınlatma onayı zorunludur. Salon sahibi, Salon sayfasından bir telefona ait müşteri verisini silebilir.
+
+Personel daveti e-posta göndermez. Salon sahibi personel sayfasından bağlantı üretir ve iletir. Personel o e-postayla hesap açınca yalnızca kendi takvimini görür. Üretimde Supabase e-posta onayını açık tutun.
 
 ## 4. Auth ayarı
 

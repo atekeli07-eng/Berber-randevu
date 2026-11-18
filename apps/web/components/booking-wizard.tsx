@@ -19,7 +19,8 @@ import {
   type Staff,
   type WorkingHour,
 } from "@berber/shared";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { translateError } from "@/lib/errors";
 import { MonthCalendar } from "./month-calendar";
 import { Button, Card, Field, Notice, cx, inputClass } from "./ui";
@@ -37,6 +38,7 @@ export function BookingWizard({
   busy,
   onBook,
   preview = false,
+  turnstileSiteKey = null,
 }: {
   salon: Salon;
   services: Service[];
@@ -50,8 +52,11 @@ export function BookingWizard({
     startsAt: Date;
     customerName: string;
     customerPhone: string;
+    consent: boolean;
+    captchaToken: string | null;
   }) => Promise<BookAppointmentResult>;
   preview?: boolean;
+  turnstileSiteKey?: string | null;
 }) {
   const [now] = useState(() => new Date());
   const today = calendarDateInZone(now, salon.timezone);
@@ -62,6 +67,8 @@ export function BookingWizard({
   const [slotIso, setSlotIso] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<BookAppointmentResult | null>(null);
@@ -127,6 +134,14 @@ export function BookingWizard({
       setError("Cep telefonunu 05xx xxx xx xx biçiminde girin.");
       return;
     }
+    if (!consent) {
+      setError("Devam etmek için aydınlatma metnini onaylayın.");
+      return;
+    }
+    if (turnstileSiteKey && !captchaToken) {
+      setError("Doğrulama kutusunu işaretleyin.");
+      return;
+    }
     setPending(true);
     setError(null);
     try {
@@ -136,6 +151,8 @@ export function BookingWizard({
         startsAt: new Date(slotIso),
         customerName: cleanName,
         customerPhone: cleanPhone,
+        consent,
+        captchaToken,
       });
       setResult(booked);
     } catch (caught) {
@@ -167,8 +184,15 @@ export function BookingWizard({
           <Row label="Saat" value={formatSlotTime(new Date(result.starts_at), salon.timezone)} />
           <Row label="Ad" value={result.customer_name} />
         </dl>
-        <p className="mt-6 text-sm text-muted">
-          Bu sürümde SMS veya e-posta gönderilmiyor. Bu ekranın görüntüsünü saklayın.
+        {result.manage_token ? (
+          <p className="mt-6 text-sm">
+            <Link className="font-semibold text-clay" href={preview ? "/onizleme/iptal" : `/r/${result.manage_token}`}>
+              Randevuyu görüntüle veya iptal et
+            </Link>
+          </p>
+        ) : null}
+        <p className="mt-3 text-sm text-muted">
+          Bu bağlantıyı saklayın. SMS gönderilmez.
           {preview ? " Örnek kayıttır, salona iletilmedi." : ""}
         </p>
       </Card>
@@ -311,6 +335,16 @@ export function BookingWizard({
           {phone && normalizeTurkishMobile(phone) ? (
             <p className="text-xs text-muted">{formatTurkishMobile(phone)}</p>
           ) : null}
+          <label className="flex items-start gap-2 text-sm">
+            <input type="checkbox" className="mt-1" checked={consent} onChange={(event) => setConsent(event.target.checked)} />
+            <span>
+              <Link href="/kvkk" className="font-semibold underline" target="_blank">
+                KVKK aydınlatma metnini
+              </Link>{" "}
+              okudum ve kişisel verilerimin randevu için işlenmesini kabul ediyorum.
+            </span>
+          </label>
+          {turnstileSiteKey ? <Turnstile siteKey={turnstileSiteKey} onToken={setCaptchaToken} /> : null}
         </Card>
       ) : null}
 
@@ -339,6 +373,25 @@ export function BookingWizard({
       </div>
     </div>
   );
+}
+
+function Turnstile({ siteKey, onToken }: { siteKey: string; onToken: (token: string) => void }) {
+  const holder = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.async = true;
+    script.onload = () => {
+      const turnstile = (window as unknown as { turnstile?: { render: (el: HTMLElement, opts: object) => void } }).turnstile;
+      if (!holder.current || !turnstile) return;
+      turnstile.render(holder.current, { sitekey: siteKey, callback: onToken });
+    };
+    document.body.appendChild(script);
+    return () => {
+      script.remove();
+    };
+  }, [siteKey, onToken]);
+  return <div ref={holder} />;
 }
 
 function Row({ label, value }: { label: string; value: string }) {

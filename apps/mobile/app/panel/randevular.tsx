@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { loadAppointments, loadSalonGraph, todayInSalon, type MobileAppointment } from "@/src/data";
+import { DeskForm } from "@/src/desk-form";
 import { colors } from "@/src/theme";
 import { ScreenTitle } from "@/src/ui";
 import type { Salon } from "@berber/shared";
@@ -61,6 +62,7 @@ export default function AppointmentsScreen() {
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         {rows.length === 0 ? <Text style={styles.muted}>Bu günde randevu yok.</Text> : null}
+        <DeskForm onChanged={() => void load()} />
         {rows.map((item) => (
           <Pressable key={item.id} style={styles.card} onPress={() => router.push(`/panel/randevu/${item.id}`)}>
             <Text style={styles.time}>
@@ -69,7 +71,9 @@ export default function AppointmentsScreen() {
             <Text style={styles.muted}>
               {item.staffName} · {item.serviceName} · {formatTurkishMobile(item.customerPhone)}
             </Text>
-            <Text style={styles.status}>{item.status === "booked" ? "Rezerve" : item.status === "done" ? "Tamamlandı" : "İptal"}</Text>
+            <Text style={styles.status}>
+              {item.status === "booked" ? "Rezerve" : item.status === "done" ? "Tamamlandı" : item.status === "blocked" ? "Kapalı" : "İptal"}
+            </Text>
           </Pressable>
         ))}
       </ScrollView>

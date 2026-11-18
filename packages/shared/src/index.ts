@@ -4,5 +4,6 @@ export * from "./time";
 export * from "./slots";
 export * from "./validation";
 export * from "./branding";
+export * from "./policy";
 export * from "./format";
 export * from "./errors";

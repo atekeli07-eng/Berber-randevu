@@ -31,6 +31,9 @@ export function SalonForm({ salon }: { salon: Salon }) {
   const [mapsUrl, setMapsUrl] = useState(salon.maps_url ?? "");
   const [instagram, setInstagram] = useState(salon.instagram ?? "");
   const [hoursSummary, setHoursSummary] = useState(salon.hours_summary ?? "");
+  const [maxActive, setMaxActive] = useState(String(salon.max_active_bookings ?? 3));
+  const [maxDaily, setMaxDaily] = useState(String(salon.max_daily_bookings ?? 1));
+  const [cutoff, setCutoff] = useState(String(salon.cancellation_cutoff_hours ?? 3));
   const [logoPath, setLogoPath] = useState(salon.logo_path);
   const [coverPath, setCoverPath] = useState(salon.cover_path);
   const [version, setVersion] = useState(salon.updated_at);
@@ -66,13 +69,34 @@ export function SalonForm({ salon }: { salon: Salon }) {
       setError("Bağlantı adı yalnızca küçük harf, rakam ve tire içerebilir.");
       return;
     }
+    const activeLimit = Number(maxActive);
+    const dailyLimit = Number(maxDaily);
+    const cutoffHours = Number(cutoff);
+    if (!Number.isInteger(activeLimit) || activeLimit < 1 || activeLimit > 10) {
+      setError("Aktif randevu sınırı 1 ile 10 arasında olmalı.");
+      return;
+    }
+    if (!Number.isInteger(dailyLimit) || dailyLimit < 1 || dailyLimit > 5) {
+      setError("Günlük randevu sınırı 1 ile 5 arasında olmalı.");
+      return;
+    }
+    if (!Number.isInteger(cutoffHours) || cutoffHours < 0 || cutoffHours > 72) {
+      setError("İptal sınırı 0 ile 72 saat arasında olmalı.");
+      return;
+    }
     setPending(true);
     setError(null);
     setInfo(null);
     const supabase = createBrowserSupabase();
     const { error: updateError } = await supabase
       .from("salons")
-      .update({ ...parsed.value, slug: cleanSlug })
+      .update({
+        ...parsed.value,
+        slug: cleanSlug,
+        max_active_bookings: activeLimit,
+        max_daily_bookings: dailyLimit,
+        cancellation_cutoff_hours: cutoffHours,
+      })
       .eq("id", salon.id);
     setPending(false);
     if (updateError) {
@@ -227,6 +251,17 @@ export function SalonForm({ salon }: { salon: Salon }) {
           <Field label="Google Maps bağlantısı">
             <input className={inputClass} value={mapsUrl} onChange={(event) => setMapsUrl(event.target.value)} placeholder="https://maps.app.goo.gl/..." />
           </Field>
+          <div className="grid gap-3 md:grid-cols-3">
+            <Field label="Aktif randevu sınırı" hint="Aynı telefonda, ileri tarih.">
+              <input className={inputClass} value={maxActive} onChange={(event) => setMaxActive(event.target.value)} inputMode="numeric" />
+            </Field>
+            <Field label="Günlük sınır" hint="Aynı gün ve telefon.">
+              <input className={inputClass} value={maxDaily} onChange={(event) => setMaxDaily(event.target.value)} inputMode="numeric" />
+            </Field>
+            <Field label="İptal sınırı (saat)">
+              <input className={inputClass} value={cutoff} onChange={(event) => setCutoff(event.target.value)} inputMode="numeric" />
+            </Field>
+          </div>
           <Field label="Instagram">
             <input className={inputClass} value={instagram} onChange={(event) => setInstagram(event.target.value)} placeholder="@salon" />
           </Field>

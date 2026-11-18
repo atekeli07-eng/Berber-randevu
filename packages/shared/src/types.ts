@@ -15,6 +15,9 @@ export type Salon = {
   instagram: string | null;
   /** Müşteriye görünen kısa çalışma saati özeti. Personel takviminden bağımsızdır. */
   hours_summary: string | null;
+  max_active_bookings: number;
+  max_daily_bookings: number;
+  cancellation_cutoff_hours: number;
   /** storage salon-media içindeki nesne yolu, ya da önizlemede yerel bir yol. */
   logo_path: string | null;
   cover_path: string | null;
@@ -42,6 +45,7 @@ export type Staff = {
   name: string;
   title: string | null;
   active: boolean;
+  user_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -111,4 +115,5 @@ export type BookAppointmentResult = {
   service_name: string;
   staff_name: string;
   salon_name: string;
+  manage_token: string;
 };

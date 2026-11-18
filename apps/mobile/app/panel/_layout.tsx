@@ -1,7 +1,9 @@
 import { Redirect, Slot, usePathname, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/src/auth";
+import { loadAccess } from "@/src/data";
 import { colors } from "@/src/theme";
 
 const TABS = [
@@ -16,8 +18,16 @@ export default function PanelLayout() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const path = usePathname();
+  const [role, setRole] = useState<"owner" | "staff" | null>(null);
+  useEffect(() => {
+    if (!session) return;
+    void loadAccess()
+      .then((access) => setRole(access.role))
+      .catch(() => setRole("owner"));
+  }, [session]);
   if (!ready) return null;
   if (!session) return <Redirect href="/giris" />;
+  const tabs = TABS.filter((tab) => role !== "staff" || tab.href !== "/panel/hizmetler");
   const showTabs = !path.includes("/randevu/");
 
   return (
@@ -27,7 +37,7 @@ export default function PanelLayout() {
       </View>
       {showTabs ? (
         <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <Pressable key={tab.href} style={styles.tab} onPress={() => router.push(tab.href)}>
               <Text style={[styles.tabText, path === tab.href && styles.tabOn]}>{tab.label}</Text>
             </Pressable>

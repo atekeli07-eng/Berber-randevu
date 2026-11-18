@@ -158,6 +158,16 @@ export function AppointmentsBoard({
           ) : (
             <DayTimeline items={visible.filter((item) => item.status !== "cancelled")} timeZone={salon.timezone} />
           )}
+          <BlockTime
+            salon={salon}
+            staff={staff}
+            workingHours={workingHours}
+            daysOff={daysOff}
+            appointments={items}
+            date={activeDate}
+            preview={preview}
+            onCreated={(item) => setItems((current) => [...current, item].sort((a, b) => a.startsAt.localeCompare(b.startsAt)))}
+          />
           <ManualBooking
             salon={salon}
             staff={staff}
@@ -263,6 +273,123 @@ function clockMinute(iso: string, timeZone: string): number {
   return hour * 60 + minute;
 }
 
+function BlockTime({
+  salon,
+  staff,
+  workingHours,
+  daysOff,
+  appointments,
+  date,
+  preview,
+  onCreated,
+}: {
+  salon: Salon;
+  staff: Staff[];
+  workingHours: WorkingHour[];
+  daysOff: DayOff[];
+  appointments: AgendaItem[];
+  date: string;
+  preview: boolean;
+  onCreated: (item: AgendaItem) => void;
+}) {
+  const activeStaff = staff.filter((person) => person.active);
+  const [staffId, setStaffId] = useState(activeStaff[0]?.id ?? "");
+  const [slot, setSlot] = useState("");
+  const [duration, setDuration] = useState("30");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
+  const minutes = Number(duration);
+  const slots = useMemo(() => {
+    const person = activeStaff.find((item) => item.id === staffId);
+    if (!person || !Number.isInteger(minutes)) return [];
+    return getAvailableSlots({
+      date,
+      timeZone: salon.timezone,
+      durationMinutes: minutes,
+      workingHours: workingHours
+        .filter((row) => row.staff_id === person.id)
+        .map((row) => ({ dayOfWeek: row.day_of_week, startMinute: row.start_minute, endMinute: row.end_minute })),
+      dayOff: daysOff.some((row) => row.staff_id === person.id && row.off_date === date),
+      busy: appointments
+        .filter((item) => item.staffId === person.id && item.status !== "cancelled")
+        .map((item) => ({ startsAt: new Date(item.startsAt), endsAt: new Date(item.endsAt) })),
+    });
+  }, [activeStaff, staffId, minutes, date, salon.timezone, workingHours, daysOff, appointments]);
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    const person = activeStaff.find((item) => item.id === staffId);
+    if (!person || !slot || !Number.isInteger(minutes) || minutes < 15 || minutes % 15 !== 0) {
+      setError("Personel, saat ve 15 dakikanın katı bir süre seçin.");
+      return;
+    }
+    if (preview) {
+      onCreated({
+        id: `blok-${slot}`,
+        customerName: "Kapalı saat",
+        customerPhone: "",
+        startsAt: slot,
+        endsAt: new Date(new Date(slot).getTime() + minutes * 60_000).toISOString(),
+        status: "blocked",
+        staffId: person.id,
+        staffName: person.name,
+        serviceId: "",
+        serviceName: "Kapalı",
+        notes: null,
+      });
+      return;
+    }
+    setPending(true);
+    const { error: rpcError } = await createBrowserSupabase().rpc("create_blocked_time", {
+      p_staff_id: person.id,
+      p_starts_at: slot,
+      p_duration_minutes: minutes,
+    });
+    setPending(false);
+    if (rpcError) {
+      setError(translateError(rpcError));
+      return;
+    }
+    setError(null);
+    router.refresh();
+  }
+
+  return (
+    <details className="rounded-3xl border border-line bg-card p-5">
+      <summary className="cursor-pointer font-serif text-2xl">Saat kapat</summary>
+      <form onSubmit={submit} className="mt-4 space-y-3">
+        {error ? <Notice>{error}</Notice> : null}
+        <Field label="Personel">
+          <select className={inputClass} value={staffId} onChange={(event) => setStaffId(event.target.value)}>
+            {activeStaff.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Süre (dakika)">
+          <input className={inputClass} value={duration} onChange={(event) => setDuration(event.target.value)} inputMode="numeric" />
+        </Field>
+        <Field label="Başlangıç">
+          <select className={inputClass} value={slot} onChange={(event) => setSlot(event.target.value)}>
+            <option value="">Saat seçin</option>
+            {slots.map((item) => (
+              <option key={item.startsAt.toISOString()} value={item.startsAt.toISOString()}>
+                {formatSlotTime(item.startsAt, salon.timezone)}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Button type="submit" disabled={pending}>
+          {pending ? "Kapatılıyor…" : "Aralığı kapat"}
+        </Button>
+      </form>
+    </details>
+  );
+}
+
 function ManualBooking({
   salon,
   staff,
@@ -319,15 +446,15 @@ function ManualBooking({
     const cleanPhone = normalizeTurkishMobile(phone);
     const service = activeServices.find((item) => item.id === serviceId);
     const person = activeStaff.find((item) => item.id === staffId);
-    if (!cleanName || !cleanPhone || !slot || !service || !person) {
-      setError("Ad, telefon, hizmet ve saat gerekli.");
+    if (!cleanName || !slot || !service || !person || (phone.trim() && !cleanPhone)) {
+      setError("Ad, hizmet ve saat gerekli. Telefon boş bırakılabilir veya 05xx biçiminde olmalıdır.");
       return;
     }
     if (preview) {
       onCreated({
         id: `onizleme-${slot}`,
         customerName: cleanName,
-        customerPhone: cleanPhone,
+        customerPhone: cleanPhone ?? "",
         startsAt: slot,
         endsAt: new Date(new Date(slot).getTime() + service.duration_minutes * 60_000).toISOString(),
         status: "booked",
@@ -344,8 +471,7 @@ function ManualBooking({
     }
     setPending(true);
     const supabase = createBrowserSupabase();
-    const { error: rpcError } = await supabase.rpc("book_appointment", {
-      p_salon_slug: salon.slug,
+    const { error: rpcError } = await supabase.rpc("create_manual_appointment", {
       p_staff_id: person.id,
       p_service_id: service.id,
       p_starts_at: slot,
@@ -365,7 +491,7 @@ function ManualBooking({
 
   return (
     <details className="rounded-3xl border border-line bg-card p-5">
-      <summary className="cursor-pointer font-serif text-2xl">Telefonda randevu ekle</summary>
+      <summary className="cursor-pointer font-serif text-2xl">Telefon veya kapıdan randevu</summary>
       <form onSubmit={submit} className="mt-4 space-y-3">
         {error ? <Notice>{error}</Notice> : null}
         <div className="grid gap-3 md:grid-cols-2">
@@ -401,7 +527,7 @@ function ManualBooking({
         <Field label="Müşteri adı">
           <input className={inputClass} value={name} onChange={(event) => setName(event.target.value)} />
         </Field>
-        <Field label="Telefon">
+        <Field label="Telefon" hint="Boş bırakılabilir.">
           <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} />
         </Field>
         <Button type="submit" disabled={pending}>
