@@ -5,7 +5,9 @@ import {
   isValidSlug,
   normalizePersonName,
   normalizeTurkishMobile,
+  parseServiceDraft,
   parseTryToKurus,
+  serviceDeleteBlockedMessage,
   slugify,
 } from "./validation";
 
@@ -65,6 +67,32 @@ describe("salon profili", () => {
       expect(parsed.value.instagram).toBe("sakal.makas");
       expect(parsed.value.district).toBe("Beyoğlu");
     }
+  });
+});
+
+describe("hizmet", () => {
+  it("ad, süre ve fiyatı doğrular", () => {
+    const parsed = parseServiceDraft({
+      name: "  Saç   kesimi ",
+      duration: "30",
+      price: "250,50",
+      description: "  ",
+    });
+    expect(parsed.ok).toBe(true);
+    if (parsed.ok) {
+      expect(parsed.value.name).toBe("Saç kesimi");
+      expect(parsed.value.duration_minutes).toBe(30);
+      expect(parsed.value.price_kurus).toBe(25050);
+      expect(parsed.value.description).toBeNull();
+    }
+    expect(parseServiceDraft({ name: "A", duration: "30", price: "10", description: "" }).ok).toBe(false);
+    expect(parseServiceDraft({ name: "Sakal", duration: "4", price: "10", description: "" }).ok).toBe(false);
+    expect(parseServiceDraft({ name: "Sakal", duration: "20", price: "abc", description: "" }).ok).toBe(false);
+  });
+
+  it("randevusu olan hizmetin silinemeyeceğini söyler", () => {
+    expect(serviceDeleteBlockedMessage(true)).toContain("Yayından kaldırılsın mı?");
+    expect(serviceDeleteBlockedMessage(false)).not.toContain("Yayından");
   });
 });
 

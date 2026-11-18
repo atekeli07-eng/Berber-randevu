@@ -2,8 +2,8 @@
 
 import {
   formatTry,
-  isValidDuration,
-  parseTryToKurus,
+  parseServiceDraft,
+  serviceDeleteBlockedMessage,
   type Service,
 } from "@berber/shared";
 import { useRouter } from "next/navigation";
@@ -22,28 +22,15 @@ export function ServicesManager({ salonId, services }: { salonId: string; servic
 
   async function add(event: React.FormEvent) {
     event.preventDefault();
-    const cleanName = name.trim().replace(/\s+/g, " ");
-    const minutes = Number(duration);
-    const kurus = parseTryToKurus(price);
-    if (cleanName.length < 2) {
-      setError("Hizmet adı en az 2 karakter olmalı.");
-      return;
-    }
-    if (!isValidDuration(minutes)) {
-      setError("Süre 5 ile 480 dakika arasında tam sayı olmalı.");
-      return;
-    }
-    if (kurus === null) {
-      setError("Fiyatı TL olarak girin. Örnek: 250 veya 250,50");
+    const parsed = parseServiceDraft({ name, duration, price, description });
+    if (!parsed.ok) {
+      setError(parsed.error);
       return;
     }
     const supabase = createBrowserSupabase();
     const { error: insertError } = await supabase.from("services").insert({
       salon_id: salonId,
-      name: cleanName,
-      duration_minutes: minutes,
-      price_kurus: kurus,
-      description: description.trim() || null,
+      ...parsed.value,
       sort_order: services.length,
     });
     if (insertError) {
@@ -67,13 +54,32 @@ export function ServicesManager({ salonId, services }: { salonId: string; servic
     router.refresh();
   }
 
-  async function remove(id: string) {
+  async function remove(service: Service) {
     const supabase = createBrowserSupabase();
-    const { error: deleteError } = await supabase.from("services").delete().eq("id", id);
+    const { count, error: countError } = await supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("service_id", service.id);
+    if (countError) {
+      setError(translateError(countError));
+      return;
+    }
+    if ((count ?? 0) > 0) {
+      const message = serviceDeleteBlockedMessage(service.active);
+      if (!service.active || !window.confirm(message)) {
+        if (!service.active) setError(message);
+        return;
+      }
+      await patch(service.id, { active: false });
+      return;
+    }
+    if (!window.confirm("Hizmet silinsin mi?")) return;
+    const { error: deleteError } = await supabase.from("services").delete().eq("id", service.id);
     if (deleteError) {
       setError(translateError(deleteError));
       return;
     }
+    setError(null);
     router.refresh();
   }
 
@@ -106,7 +112,7 @@ export function ServicesManager({ salonId, services }: { salonId: string; servic
       <div className="space-y-3">
         {services.length === 0 ? <p className="text-sm text-muted">Henüz hizmet yok.</p> : null}
         {services.map((service) => (
-          <ServiceCard key={service.id} service={service} onPatch={patch} onRemove={remove} />
+          <ServiceCard key={service.id} service={service} onPatch={patch} onRemove={() => remove(service)} onInvalid={setError} />
         ))}
       </div>
     </div>
@@ -117,10 +123,12 @@ function ServiceCard({
   service,
   onPatch,
   onRemove,
+  onInvalid,
 }: {
   service: Service;
   onPatch: (id: string, values: Partial<Service>) => Promise<void>;
-  onRemove: (id: string) => Promise<void>;
+  onRemove: () => Promise<void>;
+  onInvalid: (message: string) => void;
 }) {
   const [name, setName] = useState(service.name);
   const [duration, setDuration] = useState(String(service.duration_minutes));
@@ -145,20 +153,17 @@ function ServiceCard({
         <Button
           type="button"
           onClick={() => {
-            const minutes = Number(duration);
-            const kurus = parseTryToKurus(price);
-            if (!isValidDuration(minutes) || kurus === null || name.trim().length < 2) return;
-            void onPatch(service.id, {
-              name: name.trim(),
-              duration_minutes: minutes,
-              price_kurus: kurus,
-              description: description.trim() || null,
-            });
+            const parsed = parseServiceDraft({ name, duration, price, description });
+            if (!parsed.ok) {
+              onInvalid(parsed.error);
+              return;
+            }
+            void onPatch(service.id, parsed.value);
           }}
         >
           Güncelle
         </Button>
-        <Button type="button" variant="ghost" onClick={() => onRemove(service.id)}>
+        <Button type="button" variant="ghost" onClick={() => void onRemove()}>
           Sil
         </Button>
       </div>

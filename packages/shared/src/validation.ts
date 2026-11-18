@@ -114,3 +114,54 @@ export function formatTry(kurus: number): string {
 export function isValidDuration(minutes: number): boolean {
   return Number.isInteger(minutes) && minutes >= MIN_DURATION_MINUTES && minutes <= MAX_DURATION_MINUTES;
 }
+
+export type ServiceDraft = {
+  name: string;
+  duration_minutes: number;
+  price_kurus: number;
+  description: string | null;
+};
+
+/** Web paneli ve mobil uygulama aynı hizmet kurallarını kullanır. */
+export function parseServiceDraft(input: {
+  name: string;
+  duration: string;
+  price: string;
+  description: string;
+}): { ok: true; value: ServiceDraft } | { ok: false; error: string } {
+  const name = input.name.trim().replace(/\s+/g, " ");
+  if (name.length < 2 || name.length > 80) {
+    return { ok: false, error: "Hizmet adı 2 ile 80 karakter arasında olmalı." };
+  }
+  if (!/^\d+$/.test(input.duration.trim())) {
+    return { ok: false, error: "Süre 5 ile 480 dakika arasında tam sayı olmalı." };
+  }
+  const durationMinutes = Number(input.duration.trim());
+  if (!isValidDuration(durationMinutes)) {
+    return { ok: false, error: "Süre 5 ile 480 dakika arasında tam sayı olmalı." };
+  }
+  const priceKurus = parseTryToKurus(input.price);
+  if (priceKurus === null) {
+    return { ok: false, error: "Fiyatı TL olarak girin. Örnek: 250 veya 250,50" };
+  }
+  const description = input.description.trim().replace(/\s+/g, " ");
+  if (description.length > 500) {
+    return { ok: false, error: "Açıklama en fazla 500 karakter olabilir." };
+  }
+  return {
+    ok: true,
+    value: {
+      name,
+      duration_minutes: durationMinutes,
+      price_kurus: priceKurus,
+      description: description || null,
+    },
+  };
+}
+
+export function serviceDeleteBlockedMessage(active: boolean): string {
+  if (active) {
+    return "Bu hizmetin randevusu var. Silinemez; mevcut kayıtlar durur. Yayından kaldırılsın mı?";
+  }
+  return "Bu hizmetin randevusu var. Kayıtlar durduğu için silinemez.";
+}

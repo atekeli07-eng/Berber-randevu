@@ -121,7 +121,7 @@ pnpm --filter mobile start
 
 SDK 58 ile uyumlu Expo Go kuruluysa telefonla QR’ı okuyun. Sürüm uymuyorsa bir sonraki bölümdeki `preview` profiliyle APK veya simülatör derlemesi alın.
 
-Uygulama salon sahibi içindir: giriş, bugünün listesi, personele göre boş saatler, randevu listesi, arama, tamamlama, iptal ve hesap silme. Ayarlar ekranından salon adı, adres, telefon, tanıtım, harita, Instagram, çalışma özeti, logo ve kapak güncellenir. Logo telefonun fotoğraf arşivinden seçilir. Müşteri bu uygulamadan randevu almaz.
+Uygulama salon sahibi içindir: giriş, bugünün listesi, personele göre boş saatler, randevu listesi, arama, tamamlama, iptal ve hesap silme. Hizmetler sekmesinde hizmet eklenir, düzenlenir, yayından kaldırılır veya silinir. Randevusu olan hizmet silinmez; istenirse yayından kalkar. Ayarlar ekranından salon adı, adres, telefon, tanıtım, harita, Instagram, çalışma özeti, logo ve kapak güncellenir. Logo telefonun fotoğraf arşivinden seçilir. Müşteri bu uygulamadan randevu almaz.
 
 ## 8. Test ve derleme
 

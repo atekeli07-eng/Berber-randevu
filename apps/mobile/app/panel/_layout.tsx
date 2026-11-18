@@ -6,7 +6,8 @@ import { colors } from "@/src/theme";
 
 const TABS = [
   { href: "/panel", label: "Bugün" },
-  { href: "/panel/randevular", label: "Randevular" },
+  { href: "/panel/randevular", label: "Randevu" },
+  { href: "/panel/hizmetler", label: "Hizmet" },
   { href: "/panel/ayarlar", label: "Ayarlar" },
 ] as const;
 
