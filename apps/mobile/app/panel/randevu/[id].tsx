@@ -55,12 +55,12 @@ export default function AppointmentDetail() {
           <>
             <Text style={styles.line}>{formatLongDate(new Date(item.startsAt), salon.timezone)}</Text>
             <Text style={styles.line}>{formatSlotTime(new Date(item.startsAt), salon.timezone)}</Text>
-            <Text style={styles.line}>
-              {item.staffName} · {item.serviceName}
-            </Text>
-            <Text style={styles.link} onPress={() => Linking.openURL(toTelHref(item.customerPhone))}>
-              Ara · {formatTurkishMobile(item.customerPhone)}
-            </Text>
+            <Text style={styles.line}>{[item.staffName, item.serviceName].filter(Boolean).join(" · ")}</Text>
+            {item.status !== "blocked" ? (
+              <Text style={styles.link} onPress={() => Linking.openURL(toTelHref(item.customerPhone))}>
+                Ara · {formatTurkishMobile(item.customerPhone)}
+              </Text>
+            ) : null}
             {item.status === "booked" ? (
               <>
                 <ActionButton label={pending ? "Kaydediliyor…" : "Tamamlandı"} onPress={() => update("done")} disabled={pending} />
@@ -77,7 +77,9 @@ export default function AppointmentDetail() {
                 />
               </>
             ) : (
-              <Text style={styles.muted}>{item.status === "done" ? "Tamamlandı" : "İptal edildi"}</Text>
+              <Text style={styles.muted}>
+                {item.status === "done" ? "Tamamlandı" : item.status === "blocked" ? "Bu saat kapalı." : "İptal edildi"}
+              </Text>
             )}
           </>
         ) : null}

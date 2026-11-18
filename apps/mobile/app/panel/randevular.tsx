@@ -69,7 +69,9 @@ export default function AppointmentsScreen() {
               {salon ? formatSlotTime(new Date(item.startsAt), salon.timezone) : ""} · {item.customerName}
             </Text>
             <Text style={styles.muted}>
-              {item.staffName} · {item.serviceName} · {formatTurkishMobile(item.customerPhone)}
+              {[item.staffName, item.serviceName, item.customerPhone ? formatTurkishMobile(item.customerPhone) : ""]
+                .filter(Boolean)
+                .join(" · ")}
             </Text>
             <Text style={styles.status}>
               {item.status === "booked" ? "Rezerve" : item.status === "done" ? "Tamamlandı" : item.status === "blocked" ? "Kapalı" : "İptal"}

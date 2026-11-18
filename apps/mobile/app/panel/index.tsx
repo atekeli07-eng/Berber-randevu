@@ -84,11 +84,11 @@ export default function TodayScreen() {
             <Chip key={person.id} label={person.name} active={staffId === person.id} onPress={() => setStaffId(person.id)} />
           ))}
         </ScrollView>
-        {visible.filter((item) => item.status !== "cancelled").length === 0 ? (
+        {visible.filter((item) => item.status === "booked" || item.status === "done").length === 0 ? (
           <Text style={styles.muted}>Bugün listelenecek randevu yok.</Text>
         ) : null}
         {visible
-          .filter((item) => item.status !== "cancelled")
+          .filter((item) => item.status === "booked" || item.status === "done")
           .map((item) => (
             <Pressable key={item.id} style={styles.card} onPress={() => router.push(`/panel/randevu/${item.id}`)}>
               <Text style={styles.time}>{salon ? formatSlotTime(new Date(item.startsAt), salon.timezone) : ""}</Text>

@@ -31,6 +31,11 @@ function relatedName(value: unknown): string {
   return "";
 }
 
+function asStatus(status: unknown): AppointmentStatus {
+  if (status === "done" || status === "cancelled" || status === "booked" || status === "blocked") return status;
+  return "booked";
+}
+
 export type AccessRole = "owner" | "staff";
 
 export async function loadAccess(): Promise<{ role: AccessRole; salon: Salon; staffId: string | null }> {
@@ -65,18 +70,8 @@ export async function loadSalonGraph(): Promise<{
   workingHours: WorkingHour[];
   daysOff: DayOff[];
 }> {
+  const { salon } = await loadAccess();
   const supabase = getSupabase();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData.user) throw new Error("Oturum bulunamadı. Tekrar giriş yapın.");
-
-  const { data: salonRow, error: salonError } = await supabase
-    .from("salons")
-    .select("*")
-    .eq("owner_id", userData.user.id)
-    .maybeSingle();
-  if (salonError) throw new Error(translateError(salonError));
-  if (!salonRow) throw new Error("Bu hesaba bağlı salon yok.");
-  const salon = salonRow as Salon;
 
   const [{ data: staffRows, error: staffError }, { data: serviceRows, error: serviceError }] = await Promise.all([
     supabase.from("staff").select("*").eq("salon_id", salon.id).order("name"),
@@ -118,15 +113,13 @@ export async function loadAppointments(salon: Salon, date: string): Promise<Mobi
   if (error) throw new Error(translateError(error));
   return (data ?? []).map((row) => {
     const record = row as Record<string, unknown>;
-    const status = record.status;
-    const safe: AppointmentStatus = status === "done" || status === "cancelled" || status === "booked" ? status : "booked";
     return {
       id: String(record.id),
       customerName: String(record.customer_name ?? ""),
       customerPhone: String(record.customer_phone ?? ""),
       startsAt: String(record.starts_at),
       endsAt: String(record.ends_at),
-      status: safe,
+      status: asStatus(record.status),
       staffId: String(record.staff_id),
       staffName: relatedName(record.staff),
       serviceName: relatedName(record.services),
@@ -146,8 +139,6 @@ export async function loadAppointment(id: string): Promise<{ salon: Salon; item:
   if (error) throw new Error(translateError(error));
   if (!data) return { salon: graph.salon, item: null };
   const record = data as Record<string, unknown>;
-  const status = record.status;
-  const safe: AppointmentStatus = status === "done" || status === "cancelled" || status === "booked" ? status : "booked";
   return {
     salon: graph.salon,
     item: {
@@ -156,7 +147,7 @@ export async function loadAppointment(id: string): Promise<{ salon: Salon; item:
       customerPhone: String(record.customer_phone ?? ""),
       startsAt: String(record.starts_at),
       endsAt: String(record.ends_at),
-      status: safe,
+      status: asStatus(record.status),
       staffId: String(record.staff_id),
       staffName: relatedName(record.staff),
       serviceName: relatedName(record.services),
