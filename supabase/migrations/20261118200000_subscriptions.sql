@@ -565,3 +565,13 @@ grant execute on function public.get_public_plan() to anon, authenticated;
 grant execute on function public.admin_dashboard() to authenticated;
 grant execute on function public.admin_salon_rows() to authenticated;
 grant execute on function public.admin_salon_payments(uuid) to authenticated;
+
+-- Supabase’te “Grant API access to new tables automatically” kapalıysa
+-- anon ve authenticated yeni tablolara erişemez. Kayıt salonu oluşturur
+-- ama panel satırı okuyamaz. RLS açık kalır; bu yetkiler satır kuralını delmez.
+-- Tekrar çalıştırmak güvenlidir.
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;

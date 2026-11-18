@@ -34,7 +34,7 @@ Bir alan adınız olsun. Örnek: `berberimrandevu.com`. Yoksa Vercel’in verdi�
 3. **Run**. Hata kırmızı yazıysa metni saklayın ve tekrar denemeden önce durun. “Success” görürseniz bu adım bitti.
 4. Bu dosyayı bir daha çalıştırmayın. Tablolar zaten vardır; ikinci sefer “already exists” der.
 
-`setup.sql`, üç kurulum dosyasını sırayla uygular ve GitHub’ın daha sonra aynı dosyaları yeniden çalıştırmasını engeller. İleride şema değişirse yeni dosyalar `supabase/migrations` içine konur; GitHub, `main` dalına her gönderimde onları yollar. Bunun için bölüm 4’teki üç sırrı eklemiş olmanız gerekir. Sırlar yoksa o adım sessizce atlanır, site bozulmaz.
+`setup.sql`, üç kurulum dosyasını sırayla uygular, `anon` ve `authenticated` rollerine tablo yetkisi verir ve GitHub’ın daha sonra aynı dosyaları yeniden çalıştırmasını engeller. Supabase’te “Grant API access to new tables automatically” kapalı olsa da panel salon satırını okur. Satır güvenliği açık kalır. İleride şema değişirse yeni dosyalar `supabase/migrations` içine konur; GitHub, `main` dalına her gönderimde onları yollar. Bunun için bölüm 4’teki üç sırrı eklemiş olmanız gerekir. Sırlar yoksa o adım sessizce atlanır, site bozulmaz.
 
 Abonelik için `setup.sql` yetmez. SQL Editor’e `supabase/migrations/20261118200000_subscriptions.sql` dosyasının tamamını da bir kez yapıştırıp çalıştırın. Üretimde `setup.sql` daha önce çalıştıysa yalnızca bu yeni dosya yeter. İkinci kez çalıştırmayın.
 
